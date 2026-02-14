@@ -64,7 +64,7 @@ const SocialMediaScanner = {
       postSelector: 'li[class*="soundList"], li[class*="track"], article, [role="listitem"]',
       feedSelector: 'main, body',
       linkSelector: 'a[href]',
-      paranoia: "medium",
+      paranoia: "high",
       genericFallback: true
     },
     youtube: {
@@ -479,6 +479,21 @@ const SocialMediaScanner = {
     { pattern: /ethical\s+hacker\s+(helped|recovered|got\s+back)\s+my\s+(money|funds?|crypto)/i, category: "Recovery Scam", severity: "high" },
     { pattern: /contact\s+.{1,30}\s+(to\s+)?(recover|retrieve|get\s+back)\s+(your\s+)?(money|funds?|crypto)/i, category: "Recovery Scam", severity: "high" },
 
+    // ---- SoundCloud / Music platform scams ----
+    { pattern: /buy\s+(real\s+)?(plays?|streams?|listeners?|followers?|reposts?|likes?)\s*(for\s+)?(cheap|only|just|\$)/i, category: "Fake Engagement Service", severity: "medium", platforms: ["soundcloud", "youtube"] },
+    { pattern: /(get|buy|boost)\s+\d+k?\+?\s*(plays?|streams?|followers?|reposts?|listeners?)/i, category: "Fake Engagement Service", severity: "medium", platforms: ["soundcloud", "youtube"] },
+    { pattern: /promo(te|tion)?\s+(your\s+)?(track|song|music|beat|album)\s*(to|for)\s*\d+k?\+?\s*(listeners?|followers?|people)/i, category: "Fake Promotion Service", severity: "medium", platforms: ["soundcloud", "youtube"] },
+    { pattern: /send\s+(your\s+)?(track|beat|music|song)\s+(to|for)\s+(a\s+)?(free\s+)?(review|promo|feature|repost)/i, category: "Promo Scam Risk", severity: "low", platforms: ["soundcloud", "youtube"] },
+    { pattern: /(a&r|label|record\s+label|major\s+label)\s+(is\s+)?(looking|searching|scouting)\s+(for|at)\s+(new\s+)?(talent|artists?|music)/i, category: "Fake Label Scout", severity: "medium", platforms: ["soundcloud", "youtube"] },
+    { pattern: /sign(ed|ing)?\s+(artists?|talent)\s+(to|for)\s+(our|a|the)\s+(label|deal|contract)/i, category: "Fake Record Deal", severity: "medium", platforms: ["soundcloud", "youtube"] },
+    { pattern: /i('m|\s+am)\s+(a\s+)?(producer|a&r|scout|manager)\s+(at|for|from|with)\s+/i, category: "Fake Industry Contact", severity: "low", platforms: ["soundcloud", "youtube"] },
+    { pattern: /pay\s+(for\s+)?(a\s+)?(feature|verse|collab(oration)?)\s+(with|from|by)/i, category: "Paid Feature Scam Risk", severity: "low", platforms: ["soundcloud", "youtube"] },
+    { pattern: /free\s+(beats?|instrumentals?|type\s+beats?)\s*(link|download|dm)/i, category: "Free Beat Bait", severity: "low", platforms: ["soundcloud", "youtube"] },
+    { pattern: /guarantee\s+(you\s+)?(plays?|streams?|viral|views?|listeners?)/i, category: "Fake Guarantee", severity: "high", platforms: ["soundcloud", "youtube"] },
+    { pattern: /get\s+(signed|noticed|discovered)\s+(by\s+)?(a\s+)?(major\s+)?(label|record|industry)/i, category: "Fake Discovery Promise", severity: "medium", platforms: ["soundcloud", "youtube"] },
+    { pattern: /submit\s+(your\s+)?(music|track|song|beat)\s+(here|now|today)\s*(for\s+)?(consideration|review|feature|playlist)/i, category: "Music Submission Scam", severity: "low", platforms: ["soundcloud", "youtube"] },
+    { pattern: /playlist\s+(placement|submission|feature)\s*(only|just)?\s*\$?\d/i, category: "Paid Playlist Scam", severity: "medium", platforms: ["soundcloud", "youtube"] },
+
     // ---- Fake urgency / FOMO amplifiers ----
     { pattern: /last\s+(chance|day|hour|opportunity)\s+(to\s+)?(join|buy|invest|claim|get)/i, category: "FOMO Manipulation", severity: "medium" },
     { pattern: /offer\s+(expires?|ends?)\s+(in\s+)?\d+\s*(hours?|minutes?|mins?)/i, category: "Fake Time Pressure", severity: "medium" },
@@ -591,7 +606,14 @@ const SocialMediaScanner = {
 
     // Recovery scam targeting victims
     { require: ["Recovery Scam", "Contact Solicitation"], escalate: "critical", label: "Recovery Scam + Contact" },
-    { require: ["Recovery Scam", "WhatsApp Solicitation"], escalate: "critical", label: "Recovery Scam + WhatsApp" }
+    { require: ["Recovery Scam", "WhatsApp Solicitation"], escalate: "critical", label: "Recovery Scam + WhatsApp" },
+
+    // Music platform scam combos
+    { require: ["Fake Engagement Service", "DM Solicitation"], escalate: "high", label: "Fake Plays + DM Request" },
+    { require: ["Fake Engagement Service", "Platform Migration"], escalate: "high", label: "Fake Plays + Off-Platform" },
+    { require: ["Fake Label Scout", "Platform Migration"], escalate: "high", label: "Fake Label + Off-Platform" },
+    { require: ["Fake Label Scout", "Advance Fee Scam"], escalate: "critical", label: "Fake Label + Fee Request" },
+    { require: ["Fake Discovery Promise", "Advance Fee Scam"], escalate: "critical", label: "Fake Discovery + Fee" }
   ],
 
   /**
@@ -603,6 +625,12 @@ const SocialMediaScanner = {
 
     // Initial scan after a short delay (let content load)
     setTimeout(() => this.scanAllPosts(), 1500);
+
+    // For SPA-heavy platforms, do additional delayed scans as content loads
+    if (this._platform.genericFallback) {
+      setTimeout(() => this.scanAllPosts(), 4000);
+      setTimeout(() => this.scanAllPosts(), 8000);
+    }
 
     // Observe feed for new posts
     this._startObserver();
@@ -623,25 +651,104 @@ const SocialMediaScanner = {
 
   /**
    * Scan all visible posts on the page.
-   * Falls back to generic content selectors if platform-specific ones find nothing.
+   * Three-tier fallback:
+   *   1. Platform-specific selectors (reliable on Facebook, X, etc.)
+   *   2. Semantic role selectors (article, listitem, etc.)
+   *   3. Deep content scan — finds text blocks & links regardless of DOM structure
+   *      (essential for React SPAs like SoundCloud with opaque class names)
    */
   scanAllPosts() {
     if (!this._platform || !this._enabled) return;
 
     let posts = document.querySelectorAll(this._platform.postSelector);
 
-    // Generic fallback: if platform selectors find nothing, scan content blocks
+    // Tier 2: semantic role selectors
     if (posts.length === 0 && this._platform.genericFallback) {
       posts = document.querySelectorAll(
-        'article, [role="article"], [role="comment"], [role="listitem"], ' +
-        'li > div[class], section > div > div[class], ' +
-        'ul[class] > li[class]'
+        'article, [role="article"], [role="comment"], [role="listitem"]'
       );
+    }
+
+    // Tier 3: deep content scan — find text blocks around links and in content areas
+    if (posts.length === 0 && this._platform.genericFallback) {
+      posts = this._findContentBlocks();
     }
 
     for (const post of posts) {
       this._scanPost(post);
     }
+  },
+
+  /**
+   * Deep content block finder — works on any DOM structure.
+   * Finds scannable content by locating:
+   *   1. Containers around external links (scams always link out)
+   *   2. Text-heavy elements (comments, descriptions, bios)
+   * Returns an array of DOM elements to scan as "posts".
+   */
+  _findContentBlocks() {
+    const blocks = [];
+    const seen = new WeakSet();
+    const root = document.querySelector("main") || document.body;
+
+    // Strategy 1: Find containers around external links
+    // Scam content almost always contains outbound links
+    const links = root.querySelectorAll("a[href]");
+    for (const link of links) {
+      const href = link.getAttribute("href") || "";
+      // Skip anchors, relative paths, and javascript: links
+      if (!href || href.startsWith("#") || href.startsWith("javascript:")) continue;
+
+      // Skip same-site links
+      try {
+        const url = new URL(href, window.location.href);
+        if (url.hostname === window.location.hostname) continue;
+      } catch (e) {
+        continue;
+      }
+
+      // Walk up to find the nearest block-level container
+      const container = link.closest("div, li, p, section, article, td, blockquote") || link.parentElement;
+      if (!container || seen.has(container)) continue;
+
+      const text = (container.innerText || "").trim();
+      if (text.length < 15 || text.length > 5000) continue;
+
+      seen.add(container);
+      blocks.push(container);
+    }
+
+    // Strategy 2: Find text-heavy elements that look like user content
+    // Target elements whose class names suggest comments, descriptions, bios
+    const contentSelectors = [
+      '[class*="comment"]', '[class*="Comment"]',
+      '[class*="description"]', '[class*="Description"]',
+      '[class*="bio"]', '[class*="Bio"]',
+      '[class*="message"]', '[class*="Message"]',
+      '[class*="caption"]', '[class*="Caption"]',
+      '[class*="body"]', '[class*="Body"]',
+      '[class*="text"]', '[class*="Text"]',
+      '[class*="content"]', '[class*="Content"]'
+    ].join(", ");
+
+    try {
+      const textEls = root.querySelectorAll(contentSelectors);
+      for (const el of textEls) {
+        if (seen.has(el)) continue;
+        const text = (el.innerText || "").trim();
+        if (text.length < 25 || text.length > 3000) continue;
+        // Skip big container divs — we want leaf-ish content elements
+        if (el.children.length > 20) continue;
+        // Skip nav/header/footer
+        if (el.closest("nav, header, footer")) continue;
+        seen.add(el);
+        blocks.push(el);
+      }
+    } catch (e) {
+      // Selector may fail in edge cases — continue
+    }
+
+    return blocks;
   },
 
   /**
