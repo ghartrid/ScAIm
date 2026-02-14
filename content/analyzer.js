@@ -297,8 +297,8 @@ if (document.body) {
   });
 }
 
-// Delayed re-scan: catch content that loads after document_idle.
-// Critical for SPAs like Facebook that load feed content asynchronously.
+// Delayed re-scans: catch content that loads after document_idle.
+// Critical for SPAs like Facebook, SoundCloud, YouTube that load asynchronously.
 setTimeout(() => {
   if (ScaimAnalyzer._results &&
       ScaimAnalyzer._results.score === 0 &&
@@ -306,3 +306,16 @@ setTimeout(() => {
     ScaimAnalyzer.rerun();
   }
 }, 4000);
+
+// Second delayed scan for heavy SPAs (SoundCloud, YouTube) that take longer
+setTimeout(() => {
+  if (ScaimAnalyzer._results &&
+      ScaimAnalyzer._results.score === 0 &&
+      !ScaimAnalyzer._results.allowlisted) {
+    ScaimAnalyzer.rerun();
+  }
+  // Also retry social media scanning if platform was detected
+  if (typeof SocialMediaScanner !== "undefined" && SocialMediaScanner.isSocialMedia()) {
+    SocialMediaScanner.scanAllPosts();
+  }
+}, 8000);

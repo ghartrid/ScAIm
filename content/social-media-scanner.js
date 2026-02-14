@@ -61,17 +61,19 @@ const SocialMediaScanner = {
     },
     soundcloud: {
       hosts: ["soundcloud.com", "www.soundcloud.com", "m.soundcloud.com"],
-      postSelector: '.commentItem, .comment, [class*="Comment"], .trackItem, .soundBadge',
-      feedSelector: '.lazyLoadingList, .commentsList, main',
+      postSelector: 'li[class*="soundList"], li[class*="track"], article, [role="listitem"]',
+      feedSelector: 'main, body',
       linkSelector: 'a[href]',
-      paranoia: "medium"
+      paranoia: "medium",
+      genericFallback: true
     },
     youtube: {
       hosts: ["youtube.com", "www.youtube.com", "m.youtube.com"],
       postSelector: 'ytd-comment-renderer, ytd-post-renderer, ytd-backstage-post-renderer, #description-inline-expander, ytd-structured-description-content-renderer, .comment-renderer',
       feedSelector: '#comments, #contents, #below, #panels, main',
       linkSelector: 'a[href]',
-      paranoia: "medium"
+      paranoia: "medium",
+      genericFallback: true
     },
     linktree: {
       hosts: ["linktr.ee"],
@@ -621,11 +623,22 @@ const SocialMediaScanner = {
 
   /**
    * Scan all visible posts on the page.
+   * Falls back to generic content selectors if platform-specific ones find nothing.
    */
   scanAllPosts() {
     if (!this._platform || !this._enabled) return;
 
-    const posts = document.querySelectorAll(this._platform.postSelector);
+    let posts = document.querySelectorAll(this._platform.postSelector);
+
+    // Generic fallback: if platform selectors find nothing, scan content blocks
+    if (posts.length === 0 && this._platform.genericFallback) {
+      posts = document.querySelectorAll(
+        'article, [role="article"], [role="comment"], [role="listitem"], ' +
+        'li > div[class], section > div > div[class], ' +
+        'ul[class] > li[class]'
+      );
+    }
+
     for (const post of posts) {
       this._scanPost(post);
     }

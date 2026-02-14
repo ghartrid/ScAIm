@@ -5,7 +5,7 @@
  */
 
 const STATUS_CONFIG = {
-  safe: { icon: "\u2705", text: "Page scanned — no major concerns" },
+  safe: { icon: "\u2705", text: "No threats detected" },
   caution: { icon: "\u26A0\uFE0F", text: "Some concerns detected" },
   warning: { icon: "\u{1F6A8}", text: "Multiple suspicious elements found" },
   danger: { icon: "\u{1F6D1}", text: "High risk — potential scam detected" }
@@ -60,12 +60,26 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   function finishScan() {
-    setTimeout(() => {
-      loadTabData();
-      scanBtn.classList.remove("scanning");
-      scanBtn.innerHTML = "&#x1F50D; Scan Page";
-      scanStatus.style.display = "none";
-    }, 2500);
+    let retries = 0;
+    const maxRetries = 3;
+
+    function tryLoad() {
+      chrome.runtime.sendMessage({ type: "SCAIM_GET_TAB_DATA" }, (data) => {
+        if (!data && retries < maxRetries) {
+          retries++;
+          setTimeout(tryLoad, 1500);
+          return;
+        }
+        // Got data (or exhausted retries) — update UI
+        loadTabData();
+        scanBtn.classList.remove("scanning");
+        scanBtn.innerHTML = "&#x1F50D; Scan Page";
+        scanStatus.style.display = "none";
+      });
+    }
+
+    // First attempt after 2s, then retry up to 3 more times at 1.5s intervals
+    setTimeout(tryLoad, 2000);
   }
 
   // Inject content scripts programmatically (fallback when scripts aren't loaded)
@@ -169,7 +183,12 @@ document.addEventListener("DOMContentLoaded", () => {
       // Update status
       statusEl.className = "scaim-status " + data.level;
       statusIcon.textContent = config.icon;
-      statusText.textContent = config.text;
+      // Show hostname in safe message so user knows the scan ran
+      if (data.level === "safe" && data.hostname) {
+        statusText.textContent = data.hostname + " scanned — no threats detected";
+      } else {
+        statusText.textContent = config.text;
+      }
 
       // Update score bar
       scoreSection.style.display = "block";
