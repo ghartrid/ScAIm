@@ -3,7 +3,6 @@
  */
 const ScaimBanner = {
   _bannerId: "scaim-banner",
-  _spacerId: "scaim-spacer",
 
   /**
    * Show the warning banner for the given assessment.
@@ -18,20 +17,13 @@ const ScaimBanner = {
     this.remove();
 
     const banner = this._createBanner(assessment);
-    const spacer = this._createSpacer();
 
-    document.body.prepend(spacer);
     document.body.prepend(banner);
 
     // Trigger slide-in animation
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         banner.classList.add("scaim-visible");
-        // Update spacer height after banner is visible
-        setTimeout(() => {
-          spacer.style.height = banner.offsetHeight + "px";
-          spacer.classList.add("scaim-active");
-        }, 400);
       });
     });
   },
@@ -42,8 +34,6 @@ const ScaimBanner = {
   remove() {
     const existing = document.getElementById(this._bannerId);
     if (existing) existing.remove();
-    const spacer = document.getElementById(this._spacerId);
-    if (spacer) spacer.remove();
   },
 
   /**
@@ -112,12 +102,6 @@ const ScaimBanner = {
       toggleBtn.textContent = isExpanded
         ? "Hide findings"
         : `Show all findings (${assessment.findings.length})`;
-
-      // Update spacer height
-      setTimeout(() => {
-        const spacer = document.getElementById(this._spacerId);
-        if (spacer) spacer.style.height = banner.offsetHeight + "px";
-      }, 50);
     });
 
     const trustBtn = banner.querySelector("#scaim-trust");
@@ -131,15 +115,11 @@ const ScaimBanner = {
       } catch (e) { /* ignore */ }
       // Remove banner immediately
       banner.classList.remove("scaim-visible");
-      const spacer = document.getElementById(this._spacerId);
-      if (spacer) spacer.classList.remove("scaim-active");
       setTimeout(() => this.remove(), 400);
     });
 
     dismissBtn.addEventListener("click", () => {
       banner.classList.remove("scaim-visible");
-      const spacer = document.getElementById(this._spacerId);
-      if (spacer) spacer.classList.remove("scaim-active");
 
       // Remember dismissal for this session
       const dismissKey = "scaim-dismissed-" + window.location.href;
@@ -149,15 +129,6 @@ const ScaimBanner = {
     });
 
     return banner;
-  },
-
-  /**
-   * Create a spacer element to push page content down.
-   */
-  _createSpacer() {
-    const spacer = document.createElement("div");
-    spacer.id = this._spacerId;
-    return spacer;
   },
 
   /**

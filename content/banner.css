@@ -205,15 +205,6 @@
   background: rgba(0, 0, 0, 0.1);
 }
 
-/* Spacer to push page content down */
-#scaim-spacer {
-  display: none;
-}
-
-#scaim-spacer.scaim-active {
-  display: block;
-}
-
 /* ======================================== */
 /* Inline Post Warnings (Social Media)     */
 /* ======================================== */
