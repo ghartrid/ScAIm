@@ -1,0 +1,192 @@
+/**
+ * ScAIm Banner — Warning overlay injected at the top of suspicious pages.
+ */
+const ScaimBanner = {
+  _bannerId: "scaim-banner",
+  _spacerId: "scaim-spacer",
+
+  /**
+   * Show the warning banner for the given assessment.
+   * @param {{ level: string, score: number, summary: string, findings: Array }} assessment
+   */
+  show(assessment) {
+    // Check if dismissed for this page this session
+    const dismissKey = "scaim-dismissed-" + window.location.href;
+    if (sessionStorage.getItem(dismissKey)) return;
+
+    // Remove existing banner if any
+    this.remove();
+
+    const banner = this._createBanner(assessment);
+    const spacer = this._createSpacer();
+
+    document.body.prepend(spacer);
+    document.body.prepend(banner);
+
+    // Trigger slide-in animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        banner.classList.add("scaim-visible");
+        // Update spacer height after banner is visible
+        setTimeout(() => {
+          spacer.style.height = banner.offsetHeight + "px";
+          spacer.classList.add("scaim-active");
+        }, 400);
+      });
+    });
+  },
+
+  /**
+   * Remove the banner and spacer from the DOM.
+   */
+  remove() {
+    const existing = document.getElementById(this._bannerId);
+    if (existing) existing.remove();
+    const spacer = document.getElementById(this._spacerId);
+    if (spacer) spacer.remove();
+  },
+
+  /**
+   * Create the banner DOM element.
+   */
+  _createBanner(assessment) {
+    const banner = document.createElement("div");
+    banner.id = this._bannerId;
+    banner.className = `scaim-${assessment.level}`;
+
+    const levelConfig = this._getLevelConfig(assessment.level);
+    const topFindings = assessment.findings.slice(0, 3);
+
+    banner.innerHTML = `
+      <div class="scaim-banner-content">
+        <div class="scaim-banner-header">
+          <span class="scaim-banner-icon">${levelConfig.icon}</span>
+          <span class="scaim-banner-title">${levelConfig.title}</span>
+          <span class="scaim-score-badge">Score: ${assessment.score}/100</span>
+          <span class="scaim-banner-summary">${this._escapeHtml(assessment.summary)}</span>
+          <div class="scaim-banner-actions">
+            <button class="scaim-banner-btn scaim-btn-details" id="scaim-toggle-details">
+              Show all findings (${assessment.findings.length})
+            </button>
+            <button class="scaim-banner-btn scaim-btn-trust" id="scaim-trust" title="Add this site to your trusted allowlist">
+              Trust this site
+            </button>
+            <button class="scaim-banner-btn scaim-btn-dismiss" id="scaim-dismiss">
+              Dismiss
+            </button>
+          </div>
+        </div>
+
+        ${topFindings.length > 0 ? `
+          <div class="scaim-top-findings">
+            ${topFindings.map(f => `
+              <div class="scaim-top-finding">${this._escapeHtml(f.message)}</div>
+            `).join("")}
+          </div>
+        ` : ""}
+
+        <div class="scaim-banner-findings" id="scaim-findings">
+          ${assessment.findings.map(f => `
+            <div class="scaim-finding">
+              <span class="scaim-finding-severity scaim-severity-${f.severity}">${f.severity}</span>
+              <span class="scaim-finding-text">
+                <span class="scaim-finding-category">[${this._escapeHtml(f.category)}]</span>
+                ${this._escapeHtml(f.message)}
+              </span>
+            </div>
+          `).join("")}
+          <div class="scaim-privacy">
+            All analysis is performed locally in your browser. ScAIm does not collect, transmit, or log any of your personal data.
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Event listeners
+    const toggleBtn = banner.querySelector("#scaim-toggle-details");
+    const findingsPanel = banner.querySelector("#scaim-findings");
+    const dismissBtn = banner.querySelector("#scaim-dismiss");
+
+    toggleBtn.addEventListener("click", () => {
+      const isExpanded = findingsPanel.classList.toggle("scaim-expanded");
+      toggleBtn.textContent = isExpanded
+        ? "Hide findings"
+        : `Show all findings (${assessment.findings.length})`;
+
+      // Update spacer height
+      setTimeout(() => {
+        const spacer = document.getElementById(this._spacerId);
+        if (spacer) spacer.style.height = banner.offsetHeight + "px";
+      }, 50);
+    });
+
+    const trustBtn = banner.querySelector("#scaim-trust");
+    trustBtn.addEventListener("click", () => {
+      const hostname = window.location.hostname;
+      try {
+        chrome.runtime.sendMessage({
+          type: "SCAIM_ALLOWLIST_ADD",
+          hostname: hostname
+        });
+      } catch (e) { /* ignore */ }
+      // Remove banner immediately
+      banner.classList.remove("scaim-visible");
+      const spacer = document.getElementById(this._spacerId);
+      if (spacer) spacer.classList.remove("scaim-active");
+      setTimeout(() => this.remove(), 400);
+    });
+
+    dismissBtn.addEventListener("click", () => {
+      banner.classList.remove("scaim-visible");
+      const spacer = document.getElementById(this._spacerId);
+      if (spacer) spacer.classList.remove("scaim-active");
+
+      // Remember dismissal for this session
+      const dismissKey = "scaim-dismissed-" + window.location.href;
+      sessionStorage.setItem(dismissKey, "1");
+
+      setTimeout(() => this.remove(), 400);
+    });
+
+    return banner;
+  },
+
+  /**
+   * Create a spacer element to push page content down.
+   */
+  _createSpacer() {
+    const spacer = document.createElement("div");
+    spacer.id = this._spacerId;
+    return spacer;
+  },
+
+  /**
+   * Get configuration for each threat level.
+   */
+  _getLevelConfig(level) {
+    const configs = {
+      caution: {
+        icon: "\u26A0\uFE0F",
+        title: "ScAIm — Caution"
+      },
+      warning: {
+        icon: "\u{1F6A8}",
+        title: "ScAIm — Warning"
+      },
+      danger: {
+        icon: "\u{1F6D1}",
+        title: "ScAIm — Danger"
+      }
+    };
+    return configs[level] || configs.caution;
+  },
+
+  /**
+   * Escape HTML to prevent XSS from page content appearing in findings.
+   */
+  _escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+};

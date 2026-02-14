@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ScAIm Test Page — Simulated Scam Indicators</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f9f9f9; }
+    h1 { color: #333; }
+    h2 { color: #666; margin-top: 40px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+    .section { background: white; padding: 20px; margin: 16px 0; border-radius: 8px; border: 1px solid #e0e0e0; }
+    .controls { position: fixed; top: 10px; right: 10px; background: #333; color: white; padding: 16px; border-radius: 8px; font-size: 13px; z-index: 999; }
+    .controls a { color: #6cf; display: block; margin: 4px 0; }
+    input, button { padding: 8px 12px; margin: 4px; }
+    .red { color: #d33; font-weight: bold; }
+    .countdown { font-size: 24px; color: #d33; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="controls">
+  <strong>Test Sections:</strong>
+  <a href="#keywords">Keywords</a>
+  <a href="#phishing">Phishing</a>
+  <a href="#social">Social Engineering</a>
+  <a href="#ecommerce">Fake E-Commerce</a>
+  <a href="#structural">Structural</a>
+  <a href="#crypto">Crypto Scam</a>
+  <a href="#techsupport">Tech Support</a>
+  <a href="#romance">Romance/Fee</a>
+  <a href="#download">Malicious Download</a>
+  <a href="#social-media">Social Media Posts</a>
+  <a href="#clean">Clean Section</a>
+</div>
+
+<h1>ScAIm Test Page</h1>
+<p>This page contains simulated scam indicators across all detection categories. Load this in Chrome with ScAIm enabled to verify each detector fires correctly.</p>
+
+<!-- ============================================ -->
+<h2 id="keywords">1. Keyword Detection</h2>
+<!-- ============================================ -->
+<div class="section">
+  <h3>Financial + Urgency + Data Exchange (should trigger compound scoring)</h3>
+  <p>Please provide your <strong>bank account</strong> and <strong>routing number</strong> immediately to process your wire transfer.</p>
+  <p>You must verify identity and confirm your account within 24 hours or your account will be suspended.</p>
+  <p>Share your details including your social security number and date of birth to claim your refund.</p>
+</div>
+
+<div class="section">
+  <h3>Authority Impersonation + Urgency</h3>
+  <p>This is an official notice from the IRS. Failure to comply with this legal action will result in law enforcement involvement.</p>
+  <p>Microsoft Support has detected unauthorized activity on your account. Respond immediately to avoid suspension.</p>
+</div>
+
+<div class="section">
+  <h3>Reward Bait</h3>
+  <p>Congratulations! You've been selected as our lucky visitor! You have won a free gift! Claim your prize now by spinning the wheel!</p>
+</div>
+
+<!-- ============================================ -->
+<h2 id="phishing">2. Phishing Detection</h2>
+<!-- ============================================ -->
+<div class="section">
+  <h3>Brand Impersonation (PayPal mentioned heavily + login form)</h3>
+  <p>Welcome to PayPal. Log in to your PayPal account to review recent PayPal transactions. PayPal security requires verification.</p>
+  <form method="post">
+    <label>Email:</label>
+    <input type="email" name="email" placeholder="Enter your PayPal email"><br>
+    <label>Password:</label>
+    <input type="password" name="password" placeholder="Enter your password"><br>
+    <button type="button">Log In to PayPal</button>
+  </form>
+</div>
+
+<div class="section">
+  <h3>Href Spoofing (link shows one URL, goes to another)</h3>
+  <p>Click here to verify your account: <a href="https://totally-not-evil.example.com/steal">https://www.paypal.com/verify</a></p>
+  <p>Update your billing: <a href="https://phishing-site.example.com/grab">https://www.amazon.com/billing</a></p>
+</div>
+
+<!-- ============================================ -->
+<h2 id="social">3. Social Engineering Detection</h2>
+<!-- ============================================ -->
+<div class="section">
+  <h3>Fake Security Alerts</h3>
+  <p class="red">WARNING: Your computer has been infected with a virus!</p>
+  <p class="red">Viruses detected on your system! Do not close this window!</p>
+  <p>Call this number immediately: 1-800-555-0199 to speak with Microsoft Support.</p>
+  <p>Your computer is at risk. Do not turn off your device.</p>
+</div>
+
+<div class="section">
+  <h3>Countdown Timer</h3>
+  <p>Your offer expires in:</p>
+  <div class="countdown" id="countdown-timer">00:14:59</div>
+  <p>Act now — this is your last chance! Time is running out! Don't delay!</p>
+</div>
+
+<div class="section">
+  <h3>Fear Tactics + Threatening Language</h3>
+  <p>We noticed suspicious activity on your account.</p>
+  <p>Someone is using your credentials to access your account from an unknown device.</p>
+  <p>Your data has been compromised. Your account will be terminated if you do not verify your identity within 48 hours.</p>
+  <p>Failure to respond will result in permanent account closure. The authorities will be contacted.</p>
+</div>
+
+<!-- ============================================ -->
+<h2 id="ecommerce">4. Fake E-Commerce Detection</h2>
+<!-- ============================================ -->
+<div class="section">
+  <h3>Unrealistic Pricing</h3>
+  <p>MEGA SALE: 95% off everything!</p>
+  <p>Save 90% on all electronics!</p>
+  <div class="price">$1.99</div>
+  <div class="price">$2.49</div>
+  <div class="price">$0.99</div>
+  <div class="price">$3.50</div>
+  <p><button type="button">Add to Cart</button> <button type="button">Buy Now</button></p>
+  <p>Free shipping on all orders! Shop now! In stock — order now!</p>
+</div>
+
+<div class="section">
+  <h3>Suspicious Payment Methods</h3>
+  <p>Pay with gift card (iTunes, Google Play card, or Steam card accepted).</p>
+  <p>You can also pay with bitcoin or cryptocurrency.</p>
+</div>
+
+<div class="section">
+  <h3>Excessive Data Collection (checkout form)</h3>
+  <form>
+    <input type="text" name="ssn" placeholder="Social Security Number"><br>
+    <input type="text" name="date-of-birth" placeholder="Date of Birth"><br>
+    <input type="text" name="passport" placeholder="Passport Number"><br>
+    <input type="text" name="drivers-license" placeholder="Driver's License"><br>
+    <input type="text" name="mothers-maiden-name" placeholder="Mother's Maiden Name"><br>
+    <input type="text" name="credit-card-number" placeholder="Credit Card Number"><br>
+    <input type="text" name="cvv" placeholder="CVV"><br>
+    <button type="button">Complete Purchase</button>
+  </form>
+</div>
+
+<!-- ============================================ -->
+<h2 id="structural">5. Structural Detection</h2>
+<!-- ============================================ -->
+<div class="section">
+  <h3>Hidden Form Fields</h3>
+  <form method="post" action="https://evil-collector.example.com/harvest">
+    <input type="hidden" name="tracking_id" value="abc123">
+    <input type="hidden" name="session_token" value="xyz789">
+    <input type="hidden" name="redirect_url" value="http://malware.example.com">
+    <input type="hidden" name="campaign" value="phish_2024">
+    <input type="text" placeholder="Enter your email">
+    <button type="button">Submit</button>
+  </form>
+  <p><em>(This form POSTs to an external domain with 4 hidden fields)</em></p>
+</div>
+
+<div class="section">
+  <h3>Hidden Iframe</h3>
+  <iframe src="https://tracking.example.com/pixel" width="0" height="0" style="display:none;"></iframe>
+  <p><em>(A hidden 0x0 iframe loading from an external domain)</em></p>
+</div>
+
+<!-- ============================================ -->
+<h2 id="crypto">6. Crypto & Investment Scam Detection</h2>
+<!-- ============================================ -->
+<div class="section">
+  <h3>Seed Phrase Theft</h3>
+  <p>To recover your wallet, please enter your seed phrase below:</p>
+  <textarea name="seed-phrase" placeholder="Enter your 12-word recovery phrase" rows="3" style="width:100%"></textarea>
+  <p>You can also paste your private key to verify ownership.</p>
+</div>
+
+<div class="section">
+  <h3>Fake Trading Platform + Unrealistic ROI</h3>
+  <p>Welcome to CryptoTradeBot Pro! Our AI-powered trading bot guarantees 50% daily returns with zero risk.</p>
+  <p>Connect wallet to start earning passive income immediately. Our liquidity pool and yield farming strategies deliver 1000% APY.</p>
+  <p>Join our mining contract and get rich quick with guaranteed profits!</p>
+  <p>Don't miss this opportunity — limited whitelist spots for our token presale!</p>
+</div>
+
+<div class="section">
+  <h3>Crypto Doubling Scam + Fake Endorsement</h3>
+  <p>Elon Musk is giving away Bitcoin! Elon Musk has partnered with us for this exclusive crypto event.</p>
+  <p>Send ETH to this address to receive double your crypto back instantly! Double your Bitcoin today!</p>
+</div>
+
+<!-- ============================================ -->
+<h2 id="techsupport">7. Tech Support Scam Detection</h2>
+<!-- ============================================ -->
+<div class="section">
+  <h3>Fake Error Codes + BSOD</h3>
+  <p class="red">ERROR: Your Windows Defender has been disabled!</p>
+  <p class="red">Error code: 0x80070057 — Trojan spyware detected on your system!</p>
+  <p>Threat ID: 394829 — Your firewall has been disabled. Your computer is at risk.</p>
+  <p>Windows Security Alert: Multiple viruses detected!</p>
+</div>
+
+<div class="section">
+  <h3>Remote Access Tool + Urgent Phone Number</h3>
+  <p>Call now 1-888-555-0147 to speak with a certified Microsoft technician immediately!</p>
+  <p>Our support agent will guide you to install TeamViewer or AnyDesk so we can remove the threats remotely.</p>
+  <p>Don't hang up — your computer is under active attack. This is your toll-free support helpline.</p>
+</div>
+
+<div class="section">
+  <h3>Fake System Scan</h3>
+  <div class="scanning" style="background: #111; color: #0f0; padding: 20px; border-radius: 4px;">
+    <div class="scan-progress">Scanning system files... 67% complete</div>
+    <progress value="67" max="100" style="width:100%"></progress>
+    <div class="threat" style="color: #f33; margin-top: 10px;">3 threats found: Trojan.Gen.2, Malware.AI.38, Spyware.Keylogger</div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<h2 id="romance">8. Romance & Advance-Fee Scam Detection</h2>
+<!-- ============================================ -->
+<div class="section">
+  <h3>Advance Fee Fraud</h3>
+  <p>You have been selected as the beneficiary of a $4.5 million estate. To claim your inheritance, a small processing fee of $250 is required before we can release the funds.</p>
+  <p>A tax clearance fee must be paid to the customs authority. Pay the transfer fee to unlock your funds.</p>
+</div>
+
+<div class="section">
+  <h3>Inheritance / 419 Scam</h3>
+  <p>I am the director of the International Bank of Nigeria. A deceased client left behind a large sum of $12.5 million with no known next of kin.</p>
+  <p>I am writing to propose a confidential business transaction. Your share will be 40% of the total fund. Please contact my attorney for the will and testament.</p>
+  <p>This is a foreign government official reaching out regarding unclaimed funds through a diplomatic courier.</p>
+</div>
+
+<div class="section">
+  <h3>Romance Manipulation + Platform Migration</h3>
+  <p>God led me to you. I trust you with my life. You are the only person I can trust.</p>
+  <p>I am stranded in Turkey and my bank account has been frozen. Send me money so I can come visit you.</p>
+  <p>Message me on WhatsApp — add me on Telegram for private conversation. Let's continue on Signal.</p>
+</div>
+
+<div class="section">
+  <h3>Military Romance Scam</h3>
+  <p>I'm an army officer deployed overseas in Afghanistan. I need money for military leave papers so I can come see you.</p>
+  <p>I cannot access my funds while on deployment. Please send via Western Union or wire transfer.</p>
+</div>
+
+<!-- ============================================ -->
+<h2 id="download">9. Malicious Download Detection</h2>
+<!-- ============================================ -->
+<div class="section">
+  <h3>Dangerous File Links</h3>
+  <p><a href="https://example.com/installer.exe">Download Free Software</a></p>
+  <p><a href="https://example.com/update.scr">Screen Saver Download</a></p>
+  <p><a href="https://example.com/script.bat">Run System Optimizer</a></p>
+  <p><a href="https://example.com/tool.msi">Install Security Tool</a></p>
+</div>
+
+<div class="section">
+  <h3>Disguised File Extensions</h3>
+  <p><a href="https://example.com/invoice.pdf.exe" download="invoice.pdf.exe">Download Invoice (PDF)</a></p>
+  <p><a href="https://example.com/photo.jpg.scr">View Photo</a></p>
+</div>
+
+<div class="section">
+  <h3>Fake Update Prompts</h3>
+  <p class="red">Your Flash Player is out of date! Download the latest version immediately to continue viewing content.</p>
+  <p>Your browser is out of date. A critical security update is required.</p>
+  <p>Video codec required — install the missing font to view this page properly.</p>
+</div>
+
+<div class="section">
+  <h3>Multiple Fake Download Buttons</h3>
+  <button type="button" class="download-btn" style="background:#4CAF50;color:white;padding:12px 24px;font-size:16px;border:none;border-radius:4px;margin:4px;">DOWNLOAD NOW</button>
+  <button type="button" class="download-btn" style="background:#2196F3;color:white;padding:12px 24px;font-size:16px;border:none;border-radius:4px;margin:4px;">Free Download</button>
+  <button type="button" class="download-btn" style="background:#FF9800;color:white;padding:12px 24px;font-size:16px;border:none;border-radius:4px;margin:4px;">Download</button>
+  <button type="button" class="download-btn" style="background:#f44336;color:white;padding:12px 24px;font-size:16px;border:none;border-radius:4px;margin:4px;">Download Now</button>
+  <p>Downloaded 5,000,000+ times — trusted by 10,000,000+ users!</p>
+</div>
+
+<!-- ============================================ -->
+<h2 id="social-media">10. Social Media Post Scanner</h2>
+<!-- ============================================ -->
+<p>These simulate individual social media posts using <code>[role="article"]</code> containers. The post-level scanner checks each one independently.</p>
+
+<div class="section">
+  <h3>Simulated Feed (per-post scanning)</h3>
+
+  <!-- Clean post -->
+  <div role="article" style="border: 1px solid #ddd; padding: 16px; margin: 12px 0; border-radius: 8px; background: #fff;">
+    <p><strong>Jane Smith</strong> — 2 hours ago</p>
+    <p>Just finished a great hike in the mountains! The weather was perfect. Here are some photos from the trail.</p>
+  </div>
+
+  <!-- Scam post: crypto doubling -->
+  <div role="article" style="border: 1px solid #ddd; padding: 16px; margin: 12px 0; border-radius: 8px; background: #fff;">
+    <p><strong>CryptoMaster2026</strong> — 1 hour ago</p>
+    <p>Double your crypto today! Send ETH to this address to receive double back instantly! Guaranteed returns of 50% daily. Don't miss this opportunity!</p>
+    <p><a href="https://crypto-doubler-scam.xyz/send">Click here to participate</a></p>
+  </div>
+
+  <!-- Clean post -->
+  <div role="article" style="border: 1px solid #ddd; padding: 16px; margin: 12px 0; border-radius: 8px; background: #fff;">
+    <p><strong>Bob Johnson</strong> — 3 hours ago</p>
+    <p>Happy birthday to my wonderful daughter! Can't believe she's already 5. Time flies!</p>
+  </div>
+
+  <!-- Scam post: romance / advance fee -->
+  <div role="article" style="border: 1px solid #ddd; padding: 16px; margin: 12px 0; border-radius: 8px; background: #fff;">
+    <p><strong>Sgt. James Wilson</strong> — 4 hours ago</p>
+    <p>I am an army officer deployed overseas in Afghanistan. I am stranded here and need money. Send me money so I can come visit you. God led me to you. Message me on WhatsApp for private conversation.</p>
+  </div>
+
+  <!-- Clean post -->
+  <div role="article" style="border: 1px solid #ddd; padding: 16px; margin: 12px 0; border-radius: 8px; background: #fff;">
+    <p><strong>FoodieLife</strong> — 5 hours ago</p>
+    <p>Made this amazing pasta carbonara recipe tonight. The secret is using fresh eggs and real pecorino romano cheese!</p>
+  </div>
+
+  <!-- Scam post: tech support -->
+  <div role="article" style="border: 1px solid #ddd; padding: 16px; margin: 12px 0; border-radius: 8px; background: #fff;">
+    <p><strong>Microsoft Official Support</strong> — 30 minutes ago</p>
+    <p>Your computer has been infected with a virus! Error code: 0x80073712. Call now 1-888-555-0199 to speak with a certified technician immediately! Do not close this window!</p>
+  </div>
+
+  <!-- Scam post: suspicious link -->
+  <div role="article" style="border: 1px solid #ddd; padding: 16px; margin: 12px 0; border-radius: 8px; background: #fff;">
+    <p><strong>Prize Notifications</strong> — 1 hour ago</p>
+    <p>You have been selected as a winner! Claim your prize now!</p>
+    <p>Verify your account: <a href="https://totally-fake-site.xyz/steal">https://www.paypal.com/verify</a></p>
+    <p><a href="https://example.com/prize.exe">Download your reward certificate</a></p>
+  </div>
+
+  <!-- Scam post: 419 scam -->
+  <div role="article" style="border: 1px solid #ddd; padding: 16px; margin: 12px 0; border-radius: 8px; background: #fff;">
+    <p><strong>Barrister Ahmed</strong> — 6 hours ago</p>
+    <p>I am the director of the International Bank of Nigeria. You have been selected as the beneficiary of a $4.5 million estate. A small processing fee of $250 is required before we can release the funds. Contact my attorney for the will and testament.</p>
+  </div>
+
+</div>
+
+<!-- ============================================ -->
+<h2 id="clean">11. Clean Section (No Indicators)</h2>
+<!-- ============================================ -->
+<div class="section">
+  <p>This section contains no scam indicators. It is just regular content about cooking recipes and gardening tips.</p>
+  <p>The weather today is sunny with a high of 72 degrees. Remember to water your plants.</p>
+</div>
+
+<script>
+  // Fake countdown timer (triggers countdown timer detection)
+  let seconds = 899;
+  setInterval(() => {
+    seconds--;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    const el = document.getElementById("countdown-timer");
+    if (el) el.textContent = `00:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  }, 1000);
+</script>
+
+</body>
+</html>
