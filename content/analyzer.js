@@ -228,7 +228,33 @@ const ScaimAnalyzer = {
 // Listen for messages from popup/background
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "SCAIM_GET_RESULTS") {
-    sendResponse(ScaimAnalyzer.getResults());
+    if (ScaimAnalyzer._results) {
+      sendResponse(ScaimAnalyzer._results);
+    } else {
+      // No results yet — run a synchronous scan on the spot and return results.
+      // This handles the case where the async scan chain hasn't completed
+      // (e.g., DomainLists.init() still pending, service worker timing, etc.)
+      try {
+        const assessment = ScaimScoring.aggregate({
+          keywords: KeywordScanner.scan(),
+          structural: StructuralDetector.scan(),
+          phishing: PhishingDetector.scan(),
+          socialEngineering: SocialEngineeringDetector.scan(),
+          fakeEcommerce: FakeEcommerceDetector.scan(),
+          cryptoScam: CryptoScamDetector.scan(),
+          techSupport: TechSupportScamDetector.scan(),
+          romanceFee: RomanceFeeDetector.scan(),
+          maliciousDownload: MaliciousDownloadDetector.scan()
+        });
+        ScaimAnalyzer._results = assessment;
+        ScaimAnalyzer._hasRun = true;
+        ScaimAnalyzer._sendToBackground(assessment);
+        sendResponse(assessment);
+      } catch (err) {
+        // Detectors not available — return minimal safe result
+        sendResponse({ level: "safe", score: 0, findings: [], summary: "Scan pending" });
+      }
+    }
   }
   if (message.type === "SCAIM_RERUN") {
     ScaimAnalyzer.rerun();

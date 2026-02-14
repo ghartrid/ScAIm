@@ -59,13 +59,40 @@ document.addEventListener("DOMContentLoaded", () => {
     "content/banner.js", "content/social-media-scanner.js", "content/analyzer.js"
   ];
 
-  function finishScan() {
-    // Wait for scan to complete, then refresh results
+  function finishScan(tabId) {
+    // Wait for scan to complete, then query content script directly for results
     setTimeout(() => {
-      loadTabData();
-      scanBtn.classList.remove("scanning");
-      scanBtn.innerHTML = "&#x1F50D; Scan Page";
-      scanStatus.style.display = "none";
+      if (!tabId) {
+        loadTabData();
+        scanBtn.classList.remove("scanning");
+        scanBtn.innerHTML = "&#x1F50D; Scan Page";
+        scanStatus.style.display = "none";
+        return;
+      }
+
+      chrome.tabs.get(tabId, (tab) => {
+        let hostname = "";
+        if (tab && tab.url) try { hostname = new URL(tab.url).hostname; } catch (e) {}
+
+        chrome.tabs.sendMessage(tabId, { type: "SCAIM_GET_RESULTS" }, (results) => {
+          if (!chrome.runtime.lastError && results) {
+            renderResults({
+              level: results.level,
+              score: results.score,
+              findings: results.findings || [],
+              summary: results.summary,
+              hostname: hostname,
+              allowlisted: results.allowlisted || false,
+              blocklisted: results.blocklisted || false
+            });
+          } else {
+            loadTabData();
+          }
+          scanBtn.classList.remove("scanning");
+          scanBtn.innerHTML = "&#x1F50D; Scan Page";
+          scanStatus.style.display = "none";
+        });
+      });
     }, 2500);
   }
 
@@ -80,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         chrome.tabs.sendMessage(tabId, { type: "SCAIM_RERUN" }, () => {
           if (chrome.runtime.lastError) { /* ignore */ }
-          finishScan();
+          finishScan(tabId);
         });
       }, 1000);
     }).catch(() => {
@@ -106,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // Content script not available — inject it programmatically
           injectAndScan(tabId);
         } else {
-          finishScan();
+          finishScan(tabId);
         }
       });
     });
@@ -164,26 +191,35 @@ document.addEventListener("DOMContentLoaded", () => {
       let tabHostname = "";
       try { tabHostname = new URL(tab.url || "").hostname; } catch (e) { /* chrome:// or edge:// pages */ }
 
-      // Primary: query content script directly (survives service worker restarts)
+      // Primary: query content script directly (survives service worker restarts).
+      // The content script's SCAIM_GET_RESULTS handler will run a scan on the spot
+      // if results aren't cached yet, so this always returns data when the script is loaded.
       chrome.tabs.sendMessage(tab.id, { type: "SCAIM_GET_RESULTS" }, (results) => {
-        if (chrome.runtime.lastError || !results) {
-          // Content script not available — try background as fallback
+        if (chrome.runtime.lastError) {
+          // Content script not loaded — try background as fallback
           chrome.runtime.sendMessage({ type: "SCAIM_GET_TAB_DATA" }, (bgData) => {
             renderResults(bgData);
           });
           return;
         }
 
-        // Normalize content script response to match expected format
-        renderResults({
-          level: results.level,
-          score: results.score,
-          findings: results.findings || [],
-          summary: results.summary,
-          hostname: tabHostname,
-          allowlisted: results.allowlisted || false,
-          blocklisted: results.blocklisted || false
-        });
+        if (results) {
+          // Normalize content script response to match expected format
+          renderResults({
+            level: results.level,
+            score: results.score,
+            findings: results.findings || [],
+            summary: results.summary,
+            hostname: tabHostname,
+            allowlisted: results.allowlisted || false,
+            blocklisted: results.blocklisted || false
+          });
+        } else {
+          // Content script responded but with null — try background
+          chrome.runtime.sendMessage({ type: "SCAIM_GET_TAB_DATA" }, (bgData) => {
+            renderResults(bgData);
+          });
+        }
       });
     });
   }
