@@ -65,7 +65,8 @@ const SocialMediaScanner = {
       feedSelector: 'main, body',
       linkSelector: 'a[href]',
       paranoia: "high",
-      genericFallback: true
+      genericFallback: true,
+      minTextLength: 10  // Catch short scam messages
     },
     youtube: {
       hosts: ["youtube.com", "www.youtube.com", "m.youtube.com"],
@@ -728,7 +729,11 @@ const SocialMediaScanner = {
       '[class*="caption"]', '[class*="Caption"]',
       '[class*="body"]', '[class*="Body"]',
       '[class*="text"]', '[class*="Text"]',
-      '[class*="content"]', '[class*="Content"]'
+      '[class*="content"]', '[class*="Content"]',
+      '[class*="chat"]', '[class*="Chat"]',
+      '[class*="inbox"]', '[class*="Inbox"]',
+      '[class*="conversation"]', '[class*="Conversation"]',
+      '[class*="reply"]', '[class*="Reply"]'
     ].join(", ");
 
     try {
@@ -783,9 +788,14 @@ const SocialMediaScanner = {
     // 5. Run combo detection — escalate when multiple low-signal patterns combine
     this._checkCombinations(findings);
 
-    // 6. If findings, inject inline warning
+    // 6. If findings, inject inline warning and notify page-level analyzer
     if (findings.length > 0) {
       this._injectWarning(postElement, findings);
+
+      // Notify the page-level analyzer so the banner + popup reflect social media scam findings
+      if (typeof ScaimAnalyzer !== "undefined") {
+        ScaimAnalyzer.addSocialFindings(findings);
+      }
     }
   },
 

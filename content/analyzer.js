@@ -169,6 +169,68 @@ const ScaimAnalyzer = {
   },
 
   /**
+   * Receive scam findings from the social media post scanner.
+   * Merges them into the page-level results and shows the banner
+   * so the user sees both inline warnings AND the page-level alert.
+   */
+  addSocialFindings(findings) {
+    if (!findings || findings.length === 0) return;
+
+    // Ensure we have a base result to merge into
+    if (!this._results) {
+      this._results = { level: "safe", score: 0, findings: [], summary: "" };
+    }
+
+    // Convert social media findings to page-level format and merge
+    const newFindings = findings.map(f => ({
+      severity: f.severity || "medium",
+      category: "Social: " + (f.category || "Suspicious Content"),
+      message: f.detail || f.category || "Suspicious content detected in post"
+    }));
+
+    // Avoid duplicates — only add findings with new categories
+    const existingCategories = new Set(this._results.findings.map(f => f.category));
+    for (const f of newFindings) {
+      if (!existingCategories.has(f.category)) {
+        this._results.findings.push(f);
+        existingCategories.add(f.category);
+      }
+    }
+
+    // Recalculate severity level based on merged findings
+    const severityScore = { critical: 40, high: 25, medium: 15, low: 5 };
+    let socialScore = 0;
+    for (const f of this._results.findings) {
+      socialScore += severityScore[f.severity] || 5;
+    }
+    socialScore = Math.min(socialScore, 100);
+
+    if (socialScore > this._results.score) {
+      this._results.score = socialScore;
+    }
+
+    // Update threat level
+    if (this._results.score >= 70) {
+      this._results.level = "danger";
+      this._results.summary = "Scam content detected in posts/messages on this page.";
+    } else if (this._results.score >= 40) {
+      this._results.level = "warning";
+      this._results.summary = "Suspicious content found in posts/messages on this page.";
+    } else if (this._results.score >= 15) {
+      this._results.level = "caution";
+      this._results.summary = "Some suspicious content detected in posts/messages.";
+    }
+
+    // Show/update the banner if threat level elevated
+    if (this._results.level !== "safe") {
+      ScaimBanner.show(this._results);
+    }
+
+    // Update background with merged results
+    this._sendToBackground(this._results);
+  },
+
+  /**
    * Install SPA navigation hooks (pushState, replaceState, popstate).
    * These intercept client-side navigation on sites like Facebook, Twitter, etc.
    */
