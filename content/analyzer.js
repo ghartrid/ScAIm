@@ -231,8 +231,8 @@ const ScaimAnalyzer = {
   },
 
   /**
-   * Install SPA navigation hooks (pushState, replaceState, popstate).
-   * These intercept client-side navigation on sites like Facebook, Twitter, etc.
+   * Install SPA navigation hooks using URL polling + popstate.
+   * Avoids inline script injection which violates CSP on many sites.
    */
   installNavigationHooks() {
     if (this._navigationPatched) return;
@@ -240,32 +240,17 @@ const ScaimAnalyzer = {
 
     const self = this;
 
-    // Inject a script into the page context to patch history.pushState/replaceState.
-    // Content scripts run in an isolated world and can't intercept the page's
-    // own calls to history.pushState, so we inject into the main world.
-    const patchScript = document.createElement("script");
-    patchScript.textContent = `
-      (function() {
-        const _origPush = history.pushState;
-        const _origReplace = history.replaceState;
-        history.pushState = function() {
-          const r = _origPush.apply(this, arguments);
-          window.dispatchEvent(new CustomEvent("scaim-nav"));
-          return r;
-        };
-        history.replaceState = function() {
-          const r = _origReplace.apply(this, arguments);
-          window.dispatchEvent(new CustomEvent("scaim-nav"));
-          return r;
-        };
-      })();
-    `;
-    (document.head || document.documentElement).appendChild(patchScript);
-    patchScript.remove();
-
-    // Listen for our custom navigation event and browser back/forward
-    window.addEventListener("scaim-nav", () => self._onUrlChange());
+    // Listen for browser back/forward
     window.addEventListener("popstate", () => self._onUrlChange());
+
+    // Poll for URL changes caused by pushState/replaceState.
+    // Content scripts can't monkey-patch the page's history API without
+    // injecting inline scripts, which CSP blocks on many sites.
+    setInterval(() => {
+      if (window.location.href !== self._lastUrl) {
+        self._onUrlChange();
+      }
+    }, 1000);
   },
 
   /**

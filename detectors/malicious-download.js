@@ -139,7 +139,7 @@ const MaliciousDownloadDetector = {
 
     allElements.forEach(el => {
       const text = (el.textContent || "").trim().toLowerCase();
-      const classes = (el.className || "").toLowerCase();
+      const classes = (typeof el.className === "string" ? el.className : el.getAttribute("class") || "").toLowerCase();
       const href = (el.getAttribute("href") || "").toLowerCase();
 
       const isDownloadButton =
