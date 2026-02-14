@@ -60,26 +60,13 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   function finishScan() {
-    let retries = 0;
-    const maxRetries = 3;
-
-    function tryLoad() {
-      chrome.runtime.sendMessage({ type: "SCAIM_GET_TAB_DATA" }, (data) => {
-        if (!data && retries < maxRetries) {
-          retries++;
-          setTimeout(tryLoad, 1500);
-          return;
-        }
-        // Got data (or exhausted retries) — update UI
-        loadTabData();
-        scanBtn.classList.remove("scanning");
-        scanBtn.innerHTML = "&#x1F50D; Scan Page";
-        scanStatus.style.display = "none";
-      });
-    }
-
-    // First attempt after 2s, then retry up to 3 more times at 1.5s intervals
-    setTimeout(tryLoad, 2000);
+    // Wait for scan to complete, then refresh results
+    setTimeout(() => {
+      loadTabData();
+      scanBtn.classList.remove("scanning");
+      scanBtn.innerHTML = "&#x1F50D; Scan Page";
+      scanStatus.style.display = "none";
+    }, 2500);
   }
 
   // Inject content scripts programmatically (fallback when scripts aren't loaded)
@@ -164,76 +151,112 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ---- Load tab data ----
+  // Tries two sources: (1) content script directly (always available while page is open),
+  // (2) background service worker (may have lost data due to MV3 service worker termination).
   function loadTabData() {
-    chrome.runtime.sendMessage({ type: "SCAIM_GET_TAB_DATA" }, (data) => {
-      if (!data) {
-        statusEl.style.display = "none";
-        noData.style.display = "block";
-        trustBtn.style.display = "none";
-        blockBtn.style.display = "none";
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs[0]) {
+        renderResults(null);
         return;
       }
 
-      noData.style.display = "none";
-      statusEl.style.display = "block";
-      currentHostname = data.hostname;
+      const tab = tabs[0];
+      let tabHostname = "";
+      try { tabHostname = new URL(tab.url || "").hostname; } catch (e) { /* chrome:// or edge:// pages */ }
 
-      const config = STATUS_CONFIG[data.level] || STATUS_CONFIG.safe;
+      // Primary: query content script directly (survives service worker restarts)
+      chrome.tabs.sendMessage(tab.id, { type: "SCAIM_GET_RESULTS" }, (results) => {
+        if (chrome.runtime.lastError || !results) {
+          // Content script not available — try background as fallback
+          chrome.runtime.sendMessage({ type: "SCAIM_GET_TAB_DATA" }, (bgData) => {
+            renderResults(bgData);
+          });
+          return;
+        }
 
-      // Update status
-      statusEl.className = "scaim-status " + data.level;
-      statusIcon.textContent = config.icon;
-      // Show hostname in safe message so user knows the scan ran
-      if (data.level === "safe" && data.hostname) {
-        statusText.textContent = data.hostname + " scanned — no threats detected";
-      } else {
-        statusText.textContent = config.text;
-      }
-
-      // Update score bar
-      scoreSection.style.display = "block";
-      scoreValue.textContent = data.score;
-      scoreBar.className = "scaim-score-bar " + data.level;
-      setTimeout(() => {
-        scoreBar.style.width = data.score + "%";
-      }, 100);
-
-      // Show/hide trust and block buttons based on current state
-      if (data.allowlisted) {
-        trustBtn.style.display = "none";
-        blockBtn.style.display = "";
-        domainNote.textContent = currentHostname + " is on your trusted list.";
-        domainNote.className = "scaim-domain-note allowlisted";
-        domainNote.style.display = "block";
-      } else if (data.blocklisted) {
-        trustBtn.style.display = "";
-        blockBtn.style.display = "none";
-        domainNote.textContent = currentHostname + " is on your blocklist.";
-        domainNote.className = "scaim-domain-note blocklisted";
-        domainNote.style.display = "block";
-      } else {
-        trustBtn.style.display = "";
-        blockBtn.style.display = "";
-        domainNote.style.display = "none";
-      }
-
-      // Render findings
-      if (data.findings && data.findings.length > 0) {
-        findingsSection.style.display = "block";
-        findingsList.innerHTML = data.findings.map(f => `
-          <div class="scaim-finding-item ${f.severity}">
-            <div class="scaim-finding-item-header">
-              <span class="scaim-finding-badge ${f.severity}">${f.severity}</span>
-              <span class="scaim-finding-category">${escapeHtml(f.category)}</span>
-            </div>
-            <div class="scaim-finding-message">${escapeHtml(f.message)}</div>
-          </div>
-        `).join("");
-      } else {
-        findingsSection.style.display = "none";
-        findingsList.innerHTML = "";
-      }
+        // Normalize content script response to match expected format
+        renderResults({
+          level: results.level,
+          score: results.score,
+          findings: results.findings || [],
+          summary: results.summary,
+          hostname: tabHostname,
+          allowlisted: results.allowlisted || false,
+          blocklisted: results.blocklisted || false
+        });
+      });
     });
+  }
+
+  // ---- Render results in the popup ----
+  function renderResults(data) {
+    if (!data) {
+      statusEl.style.display = "none";
+      noData.style.display = "block";
+      trustBtn.style.display = "none";
+      blockBtn.style.display = "none";
+      return;
+    }
+
+    noData.style.display = "none";
+    statusEl.style.display = "block";
+    currentHostname = data.hostname;
+
+    const config = STATUS_CONFIG[data.level] || STATUS_CONFIG.safe;
+
+    // Update status
+    statusEl.className = "scaim-status " + data.level;
+    statusIcon.textContent = config.icon;
+    // Show hostname in safe message so user knows the scan ran
+    if (data.level === "safe" && data.hostname) {
+      statusText.textContent = data.hostname + " scanned — no threats detected";
+    } else {
+      statusText.textContent = config.text;
+    }
+
+    // Update score bar
+    scoreSection.style.display = "block";
+    scoreValue.textContent = data.score;
+    scoreBar.className = "scaim-score-bar " + data.level;
+    setTimeout(() => {
+      scoreBar.style.width = data.score + "%";
+    }, 100);
+
+    // Show/hide trust and block buttons based on current state
+    if (data.allowlisted) {
+      trustBtn.style.display = "none";
+      blockBtn.style.display = "";
+      domainNote.textContent = currentHostname + " is on your trusted list.";
+      domainNote.className = "scaim-domain-note allowlisted";
+      domainNote.style.display = "block";
+    } else if (data.blocklisted) {
+      trustBtn.style.display = "";
+      blockBtn.style.display = "none";
+      domainNote.textContent = currentHostname + " is on your blocklist.";
+      domainNote.className = "scaim-domain-note blocklisted";
+      domainNote.style.display = "block";
+    } else {
+      trustBtn.style.display = "";
+      blockBtn.style.display = "";
+      domainNote.style.display = "none";
+    }
+
+    // Render findings
+    if (data.findings && data.findings.length > 0) {
+      findingsSection.style.display = "block";
+      findingsList.innerHTML = data.findings.map(f => `
+        <div class="scaim-finding-item ${f.severity}">
+          <div class="scaim-finding-item-header">
+            <span class="scaim-finding-badge ${f.severity}">${f.severity}</span>
+            <span class="scaim-finding-category">${escapeHtml(f.category)}</span>
+          </div>
+          <div class="scaim-finding-message">${escapeHtml(f.message)}</div>
+        </div>
+      `).join("");
+    } else {
+      findingsSection.style.display = "none";
+      findingsList.innerHTML = "";
+    }
   }
 
   // Initial load
