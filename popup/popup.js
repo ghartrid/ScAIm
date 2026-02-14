@@ -49,6 +49,44 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Content script files (same order as manifest)
+  const CONTENT_SCRIPTS = [
+    "config/keywords.js", "config/domain-lists.js", "shared/scoring.js",
+    "detectors/keyword-scanner.js", "detectors/structural.js", "detectors/phishing.js",
+    "detectors/social-engineering.js", "detectors/fake-ecommerce.js",
+    "detectors/crypto-scam.js", "detectors/tech-support.js",
+    "detectors/romance-fee.js", "detectors/malicious-download.js",
+    "content/banner.js", "content/social-media-scanner.js", "content/analyzer.js"
+  ];
+
+  function finishScan() {
+    setTimeout(() => {
+      loadTabData();
+      scanBtn.classList.remove("scanning");
+      scanBtn.innerHTML = "&#x1F50D; Scan Page";
+      scanStatus.style.display = "none";
+    }, 2500);
+  }
+
+  // Inject content scripts programmatically (fallback when scripts aren't loaded)
+  function injectAndScan(tabId) {
+    chrome.scripting.insertCSS({ target: { tabId }, files: ["content/banner.css"] }).catch(() => {});
+    chrome.scripting.executeScript({
+      target: { tabId },
+      files: CONTENT_SCRIPTS
+    }).then(() => {
+      // Scripts injected — give them a moment to initialize, then trigger scan
+      setTimeout(() => {
+        chrome.tabs.sendMessage(tabId, { type: "SCAIM_RERUN" }, () => {
+          if (chrome.runtime.lastError) { /* ignore */ }
+          finishScan();
+        });
+      }, 1000);
+    }).catch(() => {
+      finishScan();
+    });
+  }
+
   // ---- Scan Page button ----
   scanBtn.addEventListener("click", () => {
     scanBtn.classList.add("scanning");
@@ -61,14 +99,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (!tabs[0]) return;
-      chrome.tabs.sendMessage(tabs[0].id, { type: "SCAIM_RERUN" }, () => {
-        // Wait for results to propagate, then reload popup data
-        setTimeout(() => {
-          loadTabData();
-          scanBtn.classList.remove("scanning");
-          scanBtn.innerHTML = "&#x1F50D; Scan Page";
-          scanStatus.style.display = "none";
-        }, 2500);
+      const tabId = tabs[0].id;
+      chrome.tabs.sendMessage(tabId, { type: "SCAIM_RERUN" }, () => {
+        if (chrome.runtime.lastError) {
+          // Content script not available — inject it programmatically
+          injectAndScan(tabId);
+        } else {
+          finishScan();
+        }
       });
     });
   });

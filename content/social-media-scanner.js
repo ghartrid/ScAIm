@@ -53,18 +53,33 @@ const SocialMediaScanner = {
       paranoia: "medium"
     },
     tiktok: {
-      hosts: ["tiktok.com", "www.tiktok.com"],
-      postSelector: '[data-e2e="recommend-list-item-container"], [class*="DivItemContainer"]',
-      feedSelector: '[data-e2e="recommend-list"], main',
+      hosts: ["tiktok.com", "www.tiktok.com", "m.tiktok.com"],
+      postSelector: '[data-e2e="recommend-list-item-container"], [data-e2e="comment-level-1"], [data-e2e="search-card-desc"], [class*="DivItemContainer"], [class*="CommentItem"]',
+      feedSelector: '[data-e2e="recommend-list"], [data-e2e="comment-list"], main',
       linkSelector: 'a[href]',
       paranoia: "high"
     },
-    youtube: {
-      hosts: ["youtube.com", "www.youtube.com"],
-      postSelector: 'ytd-comment-renderer, ytd-post-renderer',
-      feedSelector: '#comments, #contents',
+    soundcloud: {
+      hosts: ["soundcloud.com", "www.soundcloud.com", "m.soundcloud.com"],
+      postSelector: '.commentItem, .comment, [class*="Comment"], .trackItem, .soundBadge',
+      feedSelector: '.lazyLoadingList, .commentsList, main',
       linkSelector: 'a[href]',
       paranoia: "medium"
+    },
+    youtube: {
+      hosts: ["youtube.com", "www.youtube.com", "m.youtube.com"],
+      postSelector: 'ytd-comment-renderer, ytd-post-renderer, ytd-backstage-post-renderer, #description-inline-expander, ytd-structured-description-content-renderer, .comment-renderer',
+      feedSelector: '#comments, #contents, #below, #panels, main',
+      linkSelector: 'a[href]',
+      paranoia: "medium"
+    },
+    linktree: {
+      hosts: ["linktr.ee"],
+      postSelector: 'a[data-testid="LinkButton"], [data-testid="StyledContainer"] a[href], main a[href]:not([href^="#"]):not([href^="/"]):not([href*="linktr.ee"])',
+      feedSelector: 'main, [data-testid="ProfilePage"], #profile-container',
+      linkSelector: 'a[href]',
+      paranoia: "high",
+      minTextLength: 5  // Link cards have short text
     }
   },
 
@@ -628,7 +643,8 @@ const SocialMediaScanner = {
     if (postElement.querySelector('.scaim-post-warning')) return;
 
     const text = (postElement.innerText || "").trim();
-    if (text.length < 20) return; // Too short to analyze
+    const minLen = (this._platform && this._platform.minTextLength) || 20;
+    if (text.length < minLen) return; // Too short to analyze
 
     const findings = [];
 

@@ -5,7 +5,8 @@
   "description": "Paranoid scam detection for every page you visit. All analysis runs locally — no data is ever collected or sent.",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "background": {
     "service_worker": "background/service-worker.js"
