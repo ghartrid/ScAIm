@@ -214,6 +214,120 @@ body {
   color: #444;
 }
 
+/* Action buttons */
+.scaim-actions {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.scaim-btn {
+  flex: 1;
+  padding: 7px 8px;
+  border: 1px solid #D1D5DA;
+  border-radius: 6px;
+  background: white;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.scaim-btn:hover {
+  background: #F6F8FA;
+  border-color: #B0B7BF;
+}
+
+.scaim-btn:active {
+  transform: scale(0.97);
+}
+
+.scaim-btn-scan {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1D4ED8;
+}
+
+.scaim-btn-scan:hover {
+  background: #DBEAFE;
+  border-color: #93C5FD;
+}
+
+.scaim-btn-scan.scanning {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.scaim-btn-trust {
+  color: #166534;
+  border-color: #BBF7D0;
+  background: #F0FDF4;
+}
+
+.scaim-btn-trust:hover {
+  background: #DCFCE7;
+  border-color: #86EFAC;
+}
+
+.scaim-btn-block {
+  color: #991B1B;
+  border-color: #FECACA;
+  background: #FEF2F2;
+}
+
+.scaim-btn-block:hover {
+  background: #FEE2E2;
+  border-color: #FCA5A5;
+}
+
+/* Scan status spinner */
+.scaim-scan-status {
+  text-align: center;
+  font-size: 12px;
+  color: #1D4ED8;
+  padding: 8px 0;
+  font-weight: 600;
+}
+
+.scaim-scan-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #BFDBFE;
+  border-top-color: #1D4ED8;
+  border-radius: 50%;
+  animation: scaim-spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+@keyframes scaim-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Domain note (allowlisted/blocklisted) */
+.scaim-domain-note {
+  font-size: 11px;
+  text-align: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.scaim-domain-note.allowlisted {
+  background: #F0FDF4;
+  color: #166534;
+  border: 1px solid #BBF7D0;
+}
+
+.scaim-domain-note.blocklisted {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
 /* No data */
 .scaim-no-data {
   text-align: center;

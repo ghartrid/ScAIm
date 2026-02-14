@@ -102,11 +102,8 @@ const PhishingDetector = {
       score += 5;
     }
 
-    // @ symbol in URL authority (used to mask true domain)
-    // Only check the authority portion (before the path) to avoid false positives
-    // on URLs with @ in query parameters like ?email=user@gmail.com
-    const urlAuthority = url.split("//")[1]?.split("/")[0] || "";
-    if (urlAuthority.includes("@")) {
+    // @ symbol in URL (used to mask true domain)
+    if (url.includes("@")) {
       findings.push({
         severity: "high",
         category: "Deceptive URL",

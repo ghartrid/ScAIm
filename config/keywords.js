@@ -160,5 +160,35 @@ const SCAIM_KEYWORDS = {
       { term: "no cost", weight: 3 },
       { term: "100% free", weight: 5 }
     ]
+  },
+
+  crypto: {
+    label: "Crypto/Investment",
+    keywords: [
+      { term: "HODL", weight: 3 },
+      { term: "to the moon", weight: 4 },
+      { term: "diamond hands", weight: 3 },
+      { term: "NFT mint", weight: 4 },
+      { term: "airdrop", weight: 4 },
+      { term: "seed phrase", weight: 9 },
+      { term: "recovery phrase", weight: 8 },
+      { term: "private key", weight: 7 },
+      { term: "connect wallet", weight: 5 },
+      { term: "DeFi", weight: 3 },
+      { term: "yield farming", weight: 4 },
+      { term: "staking rewards", weight: 4 },
+      { term: "liquidity pool", weight: 4 },
+      { term: "token presale", weight: 6 },
+      { term: "whitelist spot", weight: 5 },
+      { term: "rug pull", weight: 7 },
+      { term: "pump and dump", weight: 8 },
+      { term: "guaranteed profit", weight: 8 },
+      { term: "passive income", weight: 5 },
+      { term: "trading bot", weight: 5 },
+      { term: "mining contract", weight: 5 },
+      { term: "double your crypto", weight: 9 },
+      { term: "send ETH", weight: 7 },
+      { term: "send BTC", weight: 7 }
+    ]
   }
 };

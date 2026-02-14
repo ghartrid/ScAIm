@@ -19,11 +19,15 @@ const ScaimScoring = {
   },
 
   WEIGHTS: {
-    keywords: 0.30,
-    structural: 0.20,
-    phishing: 0.20,
-    socialEngineering: 0.15,
-    fakeEcommerce: 0.15
+    keywords: 0.18,
+    structural: 0.14,
+    phishing: 0.14,
+    socialEngineering: 0.10,
+    fakeEcommerce: 0.10,
+    cryptoScam: 0.10,
+    techSupport: 0.08,
+    romanceFee: 0.08,
+    maliciousDownload: 0.08
   },
 
   // Findings with these categories can jump straight to WARNING
@@ -32,23 +36,28 @@ const ScaimScoring = {
     "Href Spoofing",
     "Homoglyph Domain",
     "IP Address URL",
-    "Obfuscated Code"
+    "Obfuscated Code",
+    "Seed Phrase Theft",
+    "Wallet Impersonation",
+    "Remote Access Tool",
+    "BSOD Simulation",
+    "Dangerous File Download",
+    "Disguised File Extension",
+    "Advance Fee Fraud",
+    "419 Advance Fee Scam"
   ],
 
   /**
    * Aggregate all detector results into a final threat assessment.
-   * @param {Object} results - { keywords, structural, phishing, socialEngineering, fakeEcommerce }
-   *   Each has { score: number, findings: Array }
+   * @param {Object} results - All detector results, each with { score: number, findings: Array }
    * @returns {{ level: string, score: number, findings: Array, summary: string }}
    */
   aggregate(results) {
-    // Weighted score
-    let weightedScore =
-      (results.keywords?.score || 0) * this.WEIGHTS.keywords +
-      (results.structural?.score || 0) * this.WEIGHTS.structural +
-      (results.phishing?.score || 0) * this.WEIGHTS.phishing +
-      (results.socialEngineering?.score || 0) * this.WEIGHTS.socialEngineering +
-      (results.fakeEcommerce?.score || 0) * this.WEIGHTS.fakeEcommerce;
+    // Weighted score — dynamically computed from WEIGHTS keys
+    let weightedScore = 0;
+    for (const [key, weight] of Object.entries(this.WEIGHTS)) {
+      weightedScore += (results[key]?.score || 0) * weight;
+    }
 
     // Paranoid bias: always round up
     weightedScore = Math.ceil(weightedScore);

@@ -24,6 +24,22 @@
       <div class="scaim-status-text" id="scaim-status-text">Analyzing page...</div>
     </div>
 
+    <div class="scaim-actions" id="scaim-actions">
+      <button class="scaim-btn scaim-btn-scan" id="scaim-scan-btn" title="Re-scan this page">
+        &#x1F50D; Scan Page
+      </button>
+      <button class="scaim-btn scaim-btn-trust" id="scaim-trust-btn" title="Trust this domain (skip future scans)" style="display:none;">
+        &#x2705; Trust Site
+      </button>
+      <button class="scaim-btn scaim-btn-block" id="scaim-block-btn" title="Block this domain (always flag as dangerous)" style="display:none;">
+        &#x1F6AB; Block Site
+      </button>
+    </div>
+
+    <div id="scaim-scan-status" class="scaim-scan-status" style="display:none;">
+      <span class="scaim-scan-spinner"></span> Scanning...
+    </div>
+
     <div id="scaim-score-section" class="scaim-score-section" style="display:none;">
       <div class="scaim-score-bar-container">
         <div class="scaim-score-bar" id="scaim-score-bar"></div>
@@ -42,6 +58,8 @@
       <p>No analysis data available for this page.</p>
       <p class="scaim-hint">Navigate to a webpage to see ScAIm's analysis.</p>
     </div>
+
+    <div id="scaim-domain-note" class="scaim-domain-note" style="display:none;"></div>
 
     <footer class="scaim-footer">
       <p class="scaim-privacy-note">

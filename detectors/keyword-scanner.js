@@ -108,8 +108,10 @@ const KeywordScanner = {
     if (!matchedCategories.has("urgency")) return 1.0;
     const hasFinancial = matchedCategories.has("financial") || matchedCategories.has("money");
     const hasData = matchedCategories.has("dataExchange");
+    const hasCrypto = matchedCategories.has("crypto");
     if (hasFinancial && hasData) return 1.5; // triple threat
-    if (hasFinancial || hasData) return 1.3;
+    if (hasCrypto && (hasFinancial || hasData)) return 1.5; // crypto + financial/data + urgency
+    if (hasFinancial || hasData || hasCrypto) return 1.3;
     return 1.1;
   },
 
@@ -180,6 +182,15 @@ const KeywordScanner = {
         severity: "medium",
         category: "Reward Bait",
         message: `This page uses reward/prize language (${terms}) — unsolicited prize notifications are almost always scams.`
+      });
+    }
+
+    if (byCategory.crypto) {
+      const terms = byCategory.crypto.map(m => `"${m.term}"`).join(", ");
+      findings.push({
+        severity: this._severityFromWeight(byCategory.crypto),
+        category: "Crypto/Investment",
+        message: `This page contains crypto/investment terminology (${terms}) — be extremely cautious of any requests involving seed phrases, private keys, or wallet connections.`
       });
     }
 

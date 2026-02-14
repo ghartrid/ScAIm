@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ScAIm",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "Paranoid scam detection for every page you visit. All analysis runs locally — no data is ever collected or sent.",
   "permissions": [
     "activeTab",
@@ -15,15 +15,22 @@
       "matches": ["http://*/*", "https://*/*"],
       "js": [
         "config/keywords.js",
+        "config/domain-lists.js",
         "shared/scoring.js",
         "detectors/keyword-scanner.js",
         "detectors/structural.js",
         "detectors/phishing.js",
         "detectors/social-engineering.js",
         "detectors/fake-ecommerce.js",
+        "detectors/crypto-scam.js",
+        "detectors/tech-support.js",
+        "detectors/romance-fee.js",
+        "detectors/malicious-download.js",
         "content/banner.js",
+        "content/social-media-scanner.js",
         "content/analyzer.js"
       ],
+      "css": ["content/banner.css"],
       "run_at": "document_idle"
     }
   ],
@@ -40,6 +47,12 @@
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["content/banner.css"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ],
   "browser_specific_settings": {
     "gecko": {
       "id": "scaim@extension",

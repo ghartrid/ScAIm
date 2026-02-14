@@ -42,17 +42,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const newState = !(result.enabled !== false); // default is true
       chrome.storage.local.set({ enabled: newState });
       sendResponse({ enabled: newState });
-
-      // If re-enabled, tell the active tab to re-scan immediately
-      if (newState) {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          if (tabs[0]) {
-            chrome.tabs.sendMessage(tabs[0].id, { type: "SCAIM_RERUN" }, () => {
-              chrome.runtime.lastError; // Clear any error if tab has no listener
-            });
-          }
-        });
-      }
     });
     return true;
   }
@@ -60,6 +49,98 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "SCAIM_GET_STATE") {
     chrome.storage.local.get("enabled", (result) => {
       sendResponse({ enabled: result.enabled !== false });
+    });
+    return true;
+  }
+
+  // Domain list management from popup
+  if (message.type === "SCAIM_ALLOWLIST_ADD") {
+    chrome.storage.local.get("scaim_allowlist", (result) => {
+      const list = new Set(result.scaim_allowlist || []);
+      list.add(message.hostname.toLowerCase());
+      // Remove from blocklist if present
+      chrome.storage.local.get("scaim_blocklist", (blockResult) => {
+        const blockList = new Set(blockResult.scaim_blocklist || []);
+        blockList.delete(message.hostname.toLowerCase());
+        chrome.storage.local.set({
+          scaim_allowlist: [...list],
+          scaim_blocklist: [...blockList]
+        }, () => {
+          // Notify the active tab to re-run analysis
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]) {
+              chrome.tabs.sendMessage(tabs[0].id, { type: "SCAIM_RERUN" });
+            }
+          });
+          sendResponse({ ok: true });
+        });
+      });
+    });
+    return true;
+  }
+
+  if (message.type === "SCAIM_ALLOWLIST_REMOVE") {
+    chrome.storage.local.get("scaim_allowlist", (result) => {
+      const list = new Set(result.scaim_allowlist || []);
+      list.delete(message.hostname.toLowerCase());
+      chrome.storage.local.set({ scaim_allowlist: [...list] }, () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, { type: "SCAIM_RERUN" });
+          }
+        });
+        sendResponse({ ok: true });
+      });
+    });
+    return true;
+  }
+
+  if (message.type === "SCAIM_BLOCKLIST_ADD") {
+    chrome.storage.local.get("scaim_blocklist", (result) => {
+      const list = new Set(result.scaim_blocklist || []);
+      list.add(message.hostname.toLowerCase());
+      // Remove from allowlist if present
+      chrome.storage.local.get("scaim_allowlist", (allowResult) => {
+        const allowList = new Set(allowResult.scaim_allowlist || []);
+        allowList.delete(message.hostname.toLowerCase());
+        chrome.storage.local.set({
+          scaim_blocklist: [...list],
+          scaim_allowlist: [...allowList]
+        }, () => {
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]) {
+              chrome.tabs.sendMessage(tabs[0].id, { type: "SCAIM_RERUN" });
+            }
+          });
+          sendResponse({ ok: true });
+        });
+      });
+    });
+    return true;
+  }
+
+  if (message.type === "SCAIM_BLOCKLIST_REMOVE") {
+    chrome.storage.local.get("scaim_blocklist", (result) => {
+      const list = new Set(result.scaim_blocklist || []);
+      list.delete(message.hostname.toLowerCase());
+      chrome.storage.local.set({ scaim_blocklist: [...list] }, () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, { type: "SCAIM_RERUN" });
+          }
+        });
+        sendResponse({ ok: true });
+      });
+    });
+    return true;
+  }
+
+  if (message.type === "SCAIM_GET_LISTS") {
+    chrome.storage.local.get(["scaim_allowlist", "scaim_blocklist"], (result) => {
+      sendResponse({
+        allowlist: (result.scaim_allowlist || []).sort(),
+        blocklist: (result.scaim_blocklist || []).sort()
+      });
     });
     return true;
   }
