@@ -1,0 +1,250 @@
+/* ScAIm Popup Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 360px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  color: #333;
+  background: #FAFBFC;
+}
+
+.scaim-popup {
+  padding: 16px;
+}
+
+/* Header */
+.scaim-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #E1E4E8;
+  margin-bottom: 12px;
+}
+
+.scaim-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scaim-logo-icon {
+  font-size: 22px;
+}
+
+.scaim-logo-text {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #1a1a2e;
+}
+
+/* Toggle switch */
+.scaim-toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.scaim-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.scaim-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 22px;
+}
+
+.scaim-toggle-slider::before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.scaim-toggle input:checked + .scaim-toggle-slider {
+  background-color: #28A745;
+}
+
+.scaim-toggle input:checked + .scaim-toggle-slider::before {
+  transform: translateX(18px);
+}
+
+/* Status */
+.scaim-status {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.scaim-status-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.scaim-status-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.scaim-status.safe .scaim-status-text { color: #28A745; }
+.scaim-status.caution .scaim-status-text { color: #F0AD4E; }
+.scaim-status.warning .scaim-status-text { color: #E67E22; }
+.scaim-status.danger .scaim-status-text { color: #DC3545; }
+
+/* Score bar */
+.scaim-score-section {
+  margin: 12px 0;
+}
+
+.scaim-score-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #E1E4E8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.scaim-score-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease, background-color 0.5s ease;
+  width: 0%;
+}
+
+.scaim-score-bar.safe { background: #28A745; }
+.scaim-score-bar.caution { background: #F0AD4E; }
+.scaim-score-bar.warning { background: #E67E22; }
+.scaim-score-bar.danger { background: #DC3545; }
+
+.scaim-score-label {
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 4px;
+  color: #666;
+}
+
+#scaim-score-value {
+  font-size: 16px;
+  color: #333;
+}
+
+/* Findings */
+.scaim-findings-section {
+  margin: 12px 0;
+}
+
+.scaim-findings-header {
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.scaim-findings-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.scaim-finding-item {
+  padding: 8px;
+  margin-bottom: 6px;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid #ccc;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.scaim-finding-item.critical { border-left-color: #DC3545; }
+.scaim-finding-item.high { border-left-color: #E67E22; }
+.scaim-finding-item.medium { border-left-color: #F0AD4E; }
+.scaim-finding-item.low { border-left-color: #6C757D; }
+
+.scaim-finding-item-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.scaim-finding-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: white;
+}
+
+.scaim-finding-badge.critical { background: #DC3545; }
+.scaim-finding-badge.high { background: #E67E22; }
+.scaim-finding-badge.medium { background: #F0AD4E; color: #7D4E00; }
+.scaim-finding-badge.low { background: #6C757D; }
+
+.scaim-finding-category {
+  font-weight: 600;
+  font-size: 11px;
+  color: #555;
+}
+
+.scaim-finding-message {
+  color: #444;
+}
+
+/* No data */
+.scaim-no-data {
+  text-align: center;
+  padding: 20px 0;
+  color: #999;
+}
+
+.scaim-hint {
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* Footer */
+.scaim-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #E1E4E8;
+}
+
+.scaim-privacy-note {
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Disabled state */
+.scaim-popup.disabled {
+  opacity: 0.6;
+}
+
+.scaim-popup.disabled .scaim-status-text {
+  color: #999 !important;
+}
