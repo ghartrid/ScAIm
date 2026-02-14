@@ -178,8 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ---- Load tab data ----
-  // Tries two sources: (1) content script directly (always available while page is open),
-  // (2) background service worker (may have lost data due to MV3 service worker termination).
+  // Tries: (1) content script directly, (2) background, (3) auto-inject content scripts.
   function loadTabData() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (!tabs[0]) {
@@ -189,22 +188,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const tab = tabs[0];
       let tabHostname = "";
-      try { tabHostname = new URL(tab.url || "").hostname; } catch (e) { /* chrome:// or edge:// pages */ }
+      try { tabHostname = new URL(tab.url || "").hostname; } catch (e) {}
+
+      // Can't inject into chrome:// or edge:// pages
+      if (!tab.url || tab.url.startsWith("chrome") || tab.url.startsWith("edge") || tab.url.startsWith("about")) {
+        renderResults(null);
+        return;
+      }
 
       // Primary: query content script directly (survives service worker restarts).
-      // The content script's SCAIM_GET_RESULTS handler will run a scan on the spot
-      // if results aren't cached yet, so this always returns data when the script is loaded.
       chrome.tabs.sendMessage(tab.id, { type: "SCAIM_GET_RESULTS" }, (results) => {
-        if (chrome.runtime.lastError) {
-          // Content script not loaded — try background as fallback
-          chrome.runtime.sendMessage({ type: "SCAIM_GET_TAB_DATA" }, (bgData) => {
-            renderResults(bgData);
-          });
-          return;
-        }
-
-        if (results) {
-          // Normalize content script response to match expected format
+        if (!chrome.runtime.lastError && results) {
           renderResults({
             level: results.level,
             score: results.score,
@@ -214,13 +208,50 @@ document.addEventListener("DOMContentLoaded", () => {
             allowlisted: results.allowlisted || false,
             blocklisted: results.blocklisted || false
           });
-        } else {
-          // Content script responded but with null — try background
-          chrome.runtime.sendMessage({ type: "SCAIM_GET_TAB_DATA" }, (bgData) => {
-            renderResults(bgData);
-          });
+          return;
         }
+
+        // Content script not responding — try background
+        chrome.runtime.sendMessage({ type: "SCAIM_GET_TAB_DATA" }, (bgData) => {
+          if (bgData) {
+            renderResults(bgData);
+            return;
+          }
+
+          // No data anywhere — auto-inject content scripts and scan
+          autoInjectAndLoad(tab.id, tabHostname);
+        });
       });
+    });
+  }
+
+  // Auto-inject content scripts when they're missing, then load results
+  function autoInjectAndLoad(tabId, hostname) {
+    chrome.scripting.insertCSS({ target: { tabId }, files: ["content/banner.css"] }).catch(() => {});
+    chrome.scripting.executeScript({
+      target: { tabId },
+      files: CONTENT_SCRIPTS
+    }).then(() => {
+      // Scripts injected — wait for scan to complete, then get results
+      setTimeout(() => {
+        chrome.tabs.sendMessage(tabId, { type: "SCAIM_GET_RESULTS" }, (results) => {
+          if (!chrome.runtime.lastError && results) {
+            renderResults({
+              level: results.level,
+              score: results.score,
+              findings: results.findings || [],
+              summary: results.summary,
+              hostname: hostname,
+              allowlisted: results.allowlisted || false,
+              blocklisted: results.blocklisted || false
+            });
+          } else {
+            renderResults(null);
+          }
+        });
+      }, 2000);
+    }).catch(() => {
+      renderResults(null);
     });
   }
 
