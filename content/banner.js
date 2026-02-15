@@ -47,6 +47,7 @@ const ScaimBanner = {
 
     const levelConfig = this._getLevelConfig(assessment.level);
     const topFindings = assessment.findings.slice(0, 3);
+    const VALID_SEV = ["critical", "high", "medium", "low"];
 
     banner.innerHTML = `
       <div class="scaim-banner-content">
@@ -77,15 +78,17 @@ const ScaimBanner = {
         ` : ""}
 
         <div class="scaim-banner-findings" id="scaim-findings">
-          ${assessment.findings.map(f => `
+          ${assessment.findings.map(f => {
+            const sev = VALID_SEV.includes(f.severity) ? f.severity : "medium";
+            return `
             <div class="scaim-finding">
-              <span class="scaim-finding-severity scaim-severity-${f.severity}">${f.severity}</span>
+              <span class="scaim-finding-severity scaim-severity-${sev}">${sev}</span>
               <span class="scaim-finding-text">
                 <span class="scaim-finding-category">[${this._escapeHtml(f.category)}]</span>
                 ${this._escapeHtml(f.message)}
               </span>
             </div>
-          `).join("")}
+          `;}).join("")}
           <div class="scaim-privacy">
             All analysis is performed locally in your browser. ScAIm does not collect, transmit, or log any of your personal data.
           </div>

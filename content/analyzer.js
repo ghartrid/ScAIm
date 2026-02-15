@@ -156,6 +156,7 @@ const ScaimAnalyzer = {
    */
   rerun() {
     this._hasRun = false;
+    this._results = null; // Clear stale data so popup doesn't show old page's results
     this._lastUrl = window.location.href;
     ScaimBanner.remove();
     this.run();
@@ -272,15 +273,19 @@ const ScaimAnalyzer = {
   }
 };
 
-// Listen for messages from popup/background
+// Guard against duplicate injection (popup auto-inject can re-load scripts)
+if (window.__scaimLoaded) {
+  // Already loaded — skip re-initialization
+} else {
+window.__scaimLoaded = true;
+
+// Listen for messages from popup/background (inside guard to prevent duplicate listeners)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "SCAIM_GET_RESULTS") {
     if (ScaimAnalyzer._results) {
       sendResponse(ScaimAnalyzer._results);
     } else {
       // No results yet — run a synchronous scan on the spot and return results.
-      // This handles the case where the async scan chain hasn't completed
-      // (e.g., DomainLists.init() still pending, service worker timing, etc.)
       try {
         const assessment = ScaimScoring.aggregate({
           keywords: KeywordScanner.scan(),
@@ -298,36 +303,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         ScaimAnalyzer._sendToBackground(assessment);
         sendResponse(assessment);
       } catch (err) {
-        // Detectors not available — return minimal safe result
         sendResponse({ level: "safe", score: 0, findings: [], summary: "Scan pending" });
       }
     }
-  }
-  if (message.type === "SCAIM_RERUN") {
+  } else if (message.type === "SCAIM_RERUN") {
     ScaimAnalyzer.rerun();
     sendResponse({ ok: true });
-  }
-  if (message.type === "SCAIM_ALLOWLIST_ADD") {
+  } else if (message.type === "SCAIM_ALLOWLIST_ADD") {
     DomainLists.addToAllowlist(message.hostname).then(() => {
       ScaimAnalyzer.rerun();
       sendResponse({ ok: true });
     });
     return true; // Async response
-  }
-  if (message.type === "SCAIM_BLOCKLIST_ADD") {
+  } else if (message.type === "SCAIM_BLOCKLIST_ADD") {
     DomainLists.addToBlocklist(message.hostname).then(() => {
       ScaimAnalyzer.rerun();
       sendResponse({ ok: true });
     });
-    return true;
+    return true; // Async response
   }
 });
-
-// Guard against duplicate injection (popup auto-inject can re-load scripts)
-if (window.__scaimLoaded) {
-  // Already loaded — skip re-initialization
-} else {
-window.__scaimLoaded = true;
 
 // Run analysis on page load
 ScaimAnalyzer.run();

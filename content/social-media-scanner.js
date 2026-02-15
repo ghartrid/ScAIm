@@ -1082,10 +1082,11 @@ const SocialMediaScanner = {
    * Inject an inline warning on a suspicious post.
    */
   _injectWarning(postElement, findings) {
-    // Determine overall severity
+    // Determine overall severity (validated against known values)
     const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
     const maxSeverity = findings.reduce((max, f) => {
-      return severityOrder[f.severity] > severityOrder[max] ? f.severity : max;
+      const sev = severityOrder[f.severity] ? f.severity : "low";
+      return severityOrder[sev] > severityOrder[max] ? sev : max;
     }, "low");
 
     // Build warning message
