@@ -111,6 +111,11 @@ const ScaimBanner = {
     const trustBtn = banner.querySelector("#scaim-trust");
     trustBtn.addEventListener("click", () => {
       const hostname = window.location.hostname;
+      // Update content script's in-memory allowlist directly so rerun() recognizes it
+      if (typeof DomainLists !== "undefined") {
+        DomainLists.addToAllowlist(hostname);
+      }
+      // Also persist via background service worker
       try {
         chrome.runtime.sendMessage({
           type: "SCAIM_ALLOWLIST_ADD",

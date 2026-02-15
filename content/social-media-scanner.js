@@ -806,14 +806,16 @@ const SocialMediaScanner = {
    */
   _checkPatterns(text, findings) {
     const platformName = this._platform ? this._platform.name : null;
-    const lowerText = text.toLowerCase();
+    // Normalize to defeat zero-width char and homoglyph evasion
+    const normalizedText = typeof TextNormalizer !== "undefined" ? TextNormalizer.normalize(text) : text;
+    const lowerText = normalizedText.toLowerCase();
 
     for (const sp of this.SCAM_PATTERNS) {
       // Platform filter: skip patterns locked to other platforms
       if (sp.platforms && (!platformName || !sp.platforms.includes(platformName))) continue;
 
-      // Run the regex
-      if (sp.pattern.test(text)) {
+      // Run the regex against normalized text
+      if (sp.pattern.test(normalizedText)) {
         findings.push({
           severity: sp.severity,
           category: sp.category

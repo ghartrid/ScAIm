@@ -89,6 +89,12 @@ const ScaimAnalyzer = {
    */
   _analyze() {
     try {
+      // Preserve social media findings added during re-analysis (race condition fix:
+      // addSocialFindings() may write while _analyze() is running asynchronously)
+      const existingSocialFindings = this._results
+        ? this._results.findings.filter(f => f.category && f.category.startsWith("Social: "))
+        : [];
+
       // Run all detectors
       const keywordResults = KeywordScanner.scan();
       const structuralResults = StructuralDetector.scan();
@@ -112,6 +118,16 @@ const ScaimAnalyzer = {
         romanceFee: romanceFeeResults,
         maliciousDownload: downloadResults
       });
+
+      // Merge back preserved social findings (prevents race condition loss)
+      if (existingSocialFindings.length > 0) {
+        const existingCats = new Set(assessment.findings.map(f => f.category));
+        for (const sf of existingSocialFindings) {
+          if (!existingCats.has(sf.category)) {
+            assessment.findings.push(sf);
+          }
+        }
+      }
 
       this._results = assessment;
 
@@ -273,11 +289,14 @@ const ScaimAnalyzer = {
   }
 };
 
-// Guard against duplicate injection (popup auto-inject can re-load scripts)
-if (window.__scaimLoaded) {
+// Guard against duplicate injection (popup auto-inject can re-load scripts).
+// Use a property keyed to our extension ID so the host page cannot set it
+// to suppress ScAIm (window.__scaimLoaded was directly accessible to any page).
+const _scaimGuardKey = "__scaim_" + chrome.runtime.id;
+if (window[_scaimGuardKey]) {
   // Already loaded — skip re-initialization
 } else {
-window.__scaimLoaded = true;
+window[_scaimGuardKey] = true;
 
 // Listen for messages from popup/background (inside guard to prevent duplicate listeners)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -394,4 +413,4 @@ setTimeout(() => {
   }
 }, 8000);
 
-} // end __scaimLoaded guard
+} // end _scaimGuardKey guard

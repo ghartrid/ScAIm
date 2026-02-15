@@ -9,7 +9,8 @@ const KeywordScanner = {
    * @returns {{ score: number, findings: Array, matchedCategories: Set, matches: Array }}
    */
   scan() {
-    const pageText = this._extractVisibleText();
+    const rawText = this._extractVisibleText();
+    const pageText = typeof TextNormalizer !== "undefined" ? TextNormalizer.normalize(rawText) : rawText;
     const matches = [];
     const categoryScores = {};
     const matchedCategories = new Set();

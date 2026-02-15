@@ -21,6 +21,7 @@
       "js": [
         "config/keywords.js",
         "config/domain-lists.js",
+        "shared/text-normalizer.js",
         "shared/scoring.js",
         "detectors/keyword-scanner.js",
         "detectors/structural.js",

@@ -1,10 +1,16 @@
 /* ScAIm Banner Styles */
 #scaim-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 2147483647;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 2147483647 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  clip: auto !important;
+  clip-path: none !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 14px;
   line-height: 1.4;
@@ -14,7 +20,7 @@
 }
 
 #scaim-banner.scaim-visible {
-  transform: translateY(0);
+  transform: translateY(0) !important;
 }
 
 #scaim-banner * {

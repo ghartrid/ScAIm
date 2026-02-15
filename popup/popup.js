@@ -51,7 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Content script files (same order as manifest)
   const CONTENT_SCRIPTS = [
-    "config/keywords.js", "config/domain-lists.js", "shared/scoring.js",
+    "config/keywords.js", "config/domain-lists.js",
+    "shared/text-normalizer.js", "shared/scoring.js",
     "detectors/keyword-scanner.js", "detectors/structural.js", "detectors/phishing.js",
     "detectors/social-engineering.js", "detectors/fake-ecommerce.js",
     "detectors/crypto-scam.js", "detectors/tech-support.js",
