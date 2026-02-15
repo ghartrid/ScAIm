@@ -3,15 +3,16 @@
  */
 const ScaimBanner = {
   _bannerId: "scaim-banner",
+  _dismissedUrls: new Set(),
 
   /**
    * Show the warning banner for the given assessment.
    * @param {{ level: string, score: number, summary: string, findings: Array }} assessment
    */
   show(assessment) {
-    // Check if dismissed for this page this session
-    const dismissKey = "scaim-dismissed-" + window.location.href;
-    if (sessionStorage.getItem(dismissKey)) return;
+    // Check if dismissed for this page this session (in-memory only —
+    // sessionStorage is shared with host page and can be exploited to suppress banners)
+    if (this._dismissedUrls.has(window.location.href)) return;
 
     // Remove existing banner if any
     this.remove();
@@ -121,9 +122,8 @@ const ScaimBanner = {
     dismissBtn.addEventListener("click", () => {
       banner.classList.remove("scaim-visible");
 
-      // Remember dismissal for this session
-      const dismissKey = "scaim-dismissed-" + window.location.href;
-      sessionStorage.setItem(dismissKey, "1");
+      // Remember dismissal for this page (in-memory, inaccessible to host page)
+      ScaimBanner._dismissedUrls.add(window.location.href);
 
       setTimeout(() => this.remove(), 400);
     });

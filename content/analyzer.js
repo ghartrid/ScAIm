@@ -323,6 +323,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+// Guard against duplicate injection (popup auto-inject can re-load scripts)
+if (window.__scaimLoaded) {
+  // Already loaded — skip re-initialization
+} else {
+window.__scaimLoaded = true;
+
 // Run analysis on page load
 ScaimAnalyzer.run();
 
@@ -392,3 +398,5 @@ setTimeout(() => {
     SocialMediaScanner.scanAllPosts();
   }
 }, 8000);
+
+} // end __scaimLoaded guard

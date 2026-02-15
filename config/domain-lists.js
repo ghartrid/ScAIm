@@ -125,19 +125,33 @@ const DomainLists = {
     });
   },
 
+  // Shared hosting domains where parent-domain allowlisting should be blocked.
+  // Allowlisting these would skip scanning ALL sites on the platform.
+  SHARED_HOSTING: new Set([
+    "github.io", "gitlab.io", "netlify.app", "netlify.com", "vercel.app",
+    "pages.dev", "herokuapp.com", "fly.dev", "railway.app", "render.com",
+    "surge.sh", "firebaseapp.com", "web.app", "azurewebsites.net",
+    "cloudfront.net", "amazonaws.com", "blogspot.com", "wordpress.com",
+    "wixsite.com", "squarespace.com", "webflow.io", "carrd.co",
+    "replit.dev", "glitch.me", "codepen.io"
+  ]),
+
   /**
    * Check if a hostname is on the user's allowlist.
+   * Skips parent-domain matching for shared hosting platforms.
    * @param {string} hostname
    * @returns {boolean}
    */
   isAllowed(hostname) {
     hostname = hostname.toLowerCase();
-    // Check exact match and parent domain
+    // Check exact match
     if (this._userAllowlist.has(hostname)) return true;
     // Check if a parent domain is allowed (e.g., "example.com" allows "sub.example.com")
+    // but NOT for shared hosting domains (e.g., "github.io" must not allow all GitHub Pages)
     const parts = hostname.split(".");
     for (let i = 1; i < parts.length - 1; i++) {
       const parent = parts.slice(i).join(".");
+      if (this.SHARED_HOSTING.has(parent)) return false;
       if (this._userAllowlist.has(parent)) return true;
     }
     return false;

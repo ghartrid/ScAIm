@@ -57,11 +57,16 @@ const KeywordScanner = {
     if (!document.body) return "";
     // Clone to avoid modifying the actual DOM
     const clone = document.body.cloneNode(true);
+    // Extract text from SVG <text> elements before removing SVG containers
+    // (scam content can hide in SVG text to evade detection)
+    let svgText = "";
+    const svgTexts = clone.querySelectorAll("svg text");
+    svgTexts.forEach(el => { svgText += " " + (el.textContent || ""); });
     // Remove script, style, and non-visible elements
     const removable = clone.querySelectorAll("script, style, noscript, svg, template");
     removable.forEach(el => el.remove());
     // Use textContent on the cleaned clone (innerText is unreliable on detached nodes)
-    return (clone.textContent || "").toLowerCase();
+    return ((clone.textContent || "") + svgText).toLowerCase();
   },
 
   /**

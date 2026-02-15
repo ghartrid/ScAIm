@@ -311,15 +311,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // Render findings
     if (data.findings && data.findings.length > 0) {
       findingsSection.style.display = "block";
-      findingsList.innerHTML = data.findings.map(f => `
-        <div class="scaim-finding-item ${f.severity}">
+      const VALID_SEVERITIES = ["critical", "high", "medium", "low"];
+      findingsList.innerHTML = data.findings.map(f => {
+        const sev = VALID_SEVERITIES.includes(f.severity) ? f.severity : "low";
+        return `
+        <div class="scaim-finding-item ${sev}">
           <div class="scaim-finding-item-header">
-            <span class="scaim-finding-badge ${f.severity}">${f.severity}</span>
+            <span class="scaim-finding-badge ${sev}">${sev}</span>
             <span class="scaim-finding-category">${escapeHtml(f.category)}</span>
           </div>
           <div class="scaim-finding-message">${escapeHtml(f.message)}</div>
         </div>
-      `).join("");
+      `;
+      }).join("");
     } else {
       findingsSection.style.display = "none";
       findingsList.innerHTML = "";

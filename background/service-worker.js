@@ -16,6 +16,9 @@ const BADGE_CONFIG = {
 
 // Listen for results from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Only accept messages from our own extension (defense in depth)
+  if (sender.id !== chrome.runtime.id) return;
+
   if (message.type === "SCAIM_RESULTS" && sender.tab) {
     const tabId = sender.tab.id;
     tabData[tabId] = message.data;
