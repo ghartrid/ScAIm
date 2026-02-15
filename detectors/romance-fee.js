@@ -241,11 +241,9 @@ const RomanceFeeDetector = {
     ];
 
     let matchCount = 0;
-    let totalWeight = 0;
     for (const pp of princePatternsGeneral) {
       if (pp.pattern.test(pageText)) {
         matchCount++;
-        totalWeight += pp.weight;
       }
     }
 

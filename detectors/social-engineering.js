@@ -119,7 +119,7 @@ const SocialEngineeringDetector = {
       { pattern: /virus(es)? (detected|found|alert)/i, label: "fake virus warning" },
       { pattern: /windows (has )?detected/i, label: "fake Windows alert" },
       { pattern: /your (computer|mac|pc) is (at risk|in danger)/i, label: "fake device threat" },
-      { pattern: /call (this number|us|now|immediately).*\d{3}/i, label: "tech support scam phone number" },
+      { pattern: /call (this number|us|now|immediately).{0,60}\d{3}/i, label: "tech support scam phone number" },
       { pattern: /do not (close|shut|turn off)/i, label: "scare tactic to prevent closing" }
     ];
 

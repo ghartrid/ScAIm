@@ -264,6 +264,7 @@ const ScaimAnalyzer = {
     // Content scripts can't monkey-patch the page's history API without
     // injecting inline scripts, which CSP blocks on many sites.
     setInterval(() => {
+      try { void chrome.runtime.id; } catch (e) { return; } // Context invalidated
       if (window.location.href !== self._lastUrl) {
         self._onUrlChange();
       }
@@ -393,6 +394,7 @@ if (document.body) {
 // Delayed re-scans: catch content that loads after document_idle.
 // Critical for SPAs like Facebook, SoundCloud, YouTube that load asynchronously.
 setTimeout(() => {
+  try { void chrome.runtime.id; } catch (e) { return; } // Context invalidated
   if (ScaimAnalyzer._results &&
       ScaimAnalyzer._results.score === 0 &&
       !ScaimAnalyzer._results.allowlisted) {
@@ -402,6 +404,7 @@ setTimeout(() => {
 
 // Second delayed scan for heavy SPAs (SoundCloud, YouTube) that take longer
 setTimeout(() => {
+  try { void chrome.runtime.id; } catch (e) { return; } // Context invalidated
   if (ScaimAnalyzer._results &&
       ScaimAnalyzer._results.score === 0 &&
       !ScaimAnalyzer._results.allowlisted) {

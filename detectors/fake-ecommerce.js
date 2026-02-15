@@ -241,10 +241,10 @@ const FakeEcommerceDetector = {
     const pageText = (document.body?.innerText || "").toLowerCase();
 
     const suspiciousPayments = [
-      { pattern: /pay.*(gift card|itunes|google play card|steam card)/i, label: "gift card payment" },
-      { pattern: /pay.*(bitcoin|crypto|ethereum|btc|eth)/i, label: "cryptocurrency payment" },
-      { pattern: /pay.*(wire transfer|western union|moneygram)/i, label: "wire transfer payment" },
-      { pattern: /pay.*(zelle|venmo|cash\s?app).*only/i, label: "peer-to-peer payment only" }
+      { pattern: /pay.{0,200}(gift card|itunes|google play card|steam card)/i, label: "gift card payment" },
+      { pattern: /pay.{0,200}(bitcoin|crypto|ethereum|btc|eth)/i, label: "cryptocurrency payment" },
+      { pattern: /pay.{0,200}(wire transfer|western union|moneygram)/i, label: "wire transfer payment" },
+      { pattern: /pay.{0,200}(zelle|venmo|cash\s?app).{0,100}only/i, label: "peer-to-peer payment only" }
     ];
 
     for (const sp of suspiciousPayments) {

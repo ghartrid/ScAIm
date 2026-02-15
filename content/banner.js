@@ -4,6 +4,7 @@
 const ScaimBanner = {
   _bannerId: "scaim-banner",
   _dismissedUrls: new Set(),
+  _removeTimer: null,
 
   /**
    * Show the warning banner for the given assessment.
@@ -13,6 +14,10 @@ const ScaimBanner = {
     // Check if dismissed for this page this session (in-memory only —
     // sessionStorage is shared with host page and can be exploited to suppress banners)
     if (this._dismissedUrls.has(window.location.href)) return;
+
+    // Cancel any pending remove timer (prevents stale dismiss/trust setTimeout
+    // from removing a newly-shown banner during the 400ms fade-out window)
+    clearTimeout(this._removeTimer);
 
     // Remove existing banner if any
     this.remove();
@@ -124,7 +129,7 @@ const ScaimBanner = {
       } catch (e) { /* ignore */ }
       // Remove banner immediately
       banner.classList.remove("scaim-visible");
-      setTimeout(() => this.remove(), 400);
+      ScaimBanner._removeTimer = setTimeout(() => this.remove(), 400);
     });
 
     dismissBtn.addEventListener("click", () => {
@@ -133,7 +138,7 @@ const ScaimBanner = {
       // Remember dismissal for this page (in-memory, inaccessible to host page)
       ScaimBanner._dismissedUrls.add(window.location.href);
 
-      setTimeout(() => this.remove(), 400);
+      ScaimBanner._removeTimer = setTimeout(() => this.remove(), 400);
     });
 
     return banner;

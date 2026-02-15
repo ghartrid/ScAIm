@@ -124,7 +124,7 @@ const KeywordScanner = {
   /**
    * Generate human-readable, paranoid findings from matches.
    */
-  _generateFindings(matches, matchedCategories, score) {
+  _generateFindings(matches, matchedCategories, _score) {
     const findings = [];
 
     if (matches.length === 0) return findings;

@@ -105,7 +105,7 @@ const SocialMediaScanner = {
     { pattern: /guaranteed\s+(returns?|profits?|daily|weekly|income)/i, category: "Investment Scam", severity: "high" },
     { pattern: /(\d{2,})%\s*(daily|weekly)\s*(return|profit|yield|gain)/i, category: "Unrealistic ROI", severity: "high" },
     { pattern: /connect\s+(your\s+)?wallet/i, category: "Wallet Connect Request", severity: "medium" },
-    { pattern: /airdrop.*claim|claim.*airdrop/i, category: "Fake Airdrop", severity: "high" },
+    { pattern: /airdrop.{0,100}claim|claim.{0,100}airdrop/i, category: "Fake Airdrop", severity: "high" },
     { pattern: /free\s+(bitcoin|btc|eth|crypto|token|nft)/i, category: "Free Crypto Scam", severity: "medium" },
     { pattern: /mining\s+(contract|pool|reward)/i, category: "Mining Scam", severity: "medium" },
     { pattern: /private\s+key|seed\s+phrase|recovery\s+phrase/i, category: "Key Theft Risk", severity: "high" },
@@ -120,7 +120,7 @@ const SocialMediaScanner = {
 
     // ---- Tech support ----
     { pattern: /your\s+(computer|device|system)\s+(is|has\s+been)\s+(infected|compromised|hacked)/i, category: "Fake Security Alert", severity: "high" },
-    { pattern: /call\s+(now|immediately|this\s+number).*\d{3}/i, category: "Phone Scam", severity: "high" },
+    { pattern: /call\s+(now|immediately|this\s+number).{0,60}\d{3}/i, category: "Phone Scam", severity: "high" },
     { pattern: /error\s*(code\s*)?#?\s*0x[0-9a-f]{4,}/i, category: "Fake Error Code", severity: "high" },
     { pattern: /virus(es)?\s+(detected|found)/i, category: "Fake Virus Alert", severity: "high" },
 
@@ -144,7 +144,7 @@ const SocialMediaScanner = {
     // ---- Money-making / MLM / Work-from-home scams ----
     { pattern: /i\s+(made|earned|got)\s+\$\s*[\d,]+\s*(in|from|per|this|last)\s*(a\s+)?(week|day|month|hour)/i, category: "Income Claim", severity: "medium" },
     { pattern: /earn\s+\$?\s*[\d,]+\s*(per|a|every|each)\s*(week|day|month|hour)/i, category: "Income Claim", severity: "medium" },
-    { pattern: /work\s*(ing)?\s+from\s+home.*\$|(\$|earn).*work\s*(ing)?\s+from\s+home/i, category: "Work-From-Home Scam", severity: "medium" },
+    { pattern: /work\s*(ing)?\s+from\s+home.{0,100}\$|(\$|earn).{0,100}work\s*(ing)?\s+from\s+home/i, category: "Work-From-Home Scam", severity: "medium" },
     { pattern: /be\s+your\s+own\s+boss/i, category: "MLM/Pyramid", severity: "low" },
     { pattern: /join\s+my\s+team/i, category: "MLM/Pyramid", severity: "low" },
     { pattern: /financial\s+freedom\s*(today|now|guaranteed|is\s+possible)?/i, category: "Income Scam", severity: "medium" },
@@ -207,43 +207,43 @@ const SocialMediaScanner = {
     { pattern: /no\s+(experience|degree|resume)\s+(needed|required|necessary)/i, category: "Job Scam", severity: "medium" },
     { pattern: /earn\s+\$\d[\d,]*\s*(\/|\s+per\s+)(week|day|hour)\s*(from\s+home)?/i, category: "Job Scam", severity: "medium" },
     { pattern: /make\s+money\s+(online|from\s+home|from\s+your\s+phone)/i, category: "Job Scam", severity: "medium" },
-    { pattern: /data\s+entry\s+(job|work|position).*\$\d/i, category: "Data Entry Scam", severity: "medium" },
+    { pattern: /data\s+entry\s+(job|work|position).{0,100}\$\d/i, category: "Data Entry Scam", severity: "medium" },
     { pattern: /pay\s+(a\s+)?(registration|training|starter|kit)\s+fee/i, category: "Job Fee Scam", severity: "high" },
     { pattern: /secret\s+(shopper|mystery\s+shopper)/i, category: "Mystery Shopper Scam", severity: "medium" },
     { pattern: /envelope\s+stuffing/i, category: "Envelope Stuffing Scam", severity: "medium" },
     { pattern: /typing\s+(job|work|position)\s*(from\s+home)?/i, category: "Typing Scam", severity: "low" },
     { pattern: /we\s+found\s+your\s+(resume|profile|cv)/i, category: "Fake Recruiter", severity: "medium" },
     { pattern: /congratulations.*selected\s+for\s+(a\s+)?(position|job|role|interview)/i, category: "Fake Job Offer", severity: "high" },
-    { pattern: /work\s+from\s+(home|anywhere).*\$\d[\d,]*\s*(per|a|daily|weekly)/i, category: "WFH Scam", severity: "medium" },
+    { pattern: /work\s+from\s+(home|anywhere).{0,100}\$\d[\d,]*\s*(per|a|daily|weekly)/i, category: "WFH Scam", severity: "medium" },
 
     // ---- Rental / Housing scams ----
     { pattern: /below\s+market\s+(price|value|rate|rent)/i, category: "Rental Scam", severity: "medium" },
     { pattern: /(deposit|rent)\s+(via|with|by)\s+(wire|zelle|venmo|cash\s*app|gift\s+card)/i, category: "Rental Payment Scam", severity: "high" },
     { pattern: /can'?t\s+(show|view|visit)\s+(the\s+)?(property|apartment|house|unit)\s+(in\s+person|right\s+now)/i, category: "Rental Scam", severity: "high" },
-    { pattern: /i'?m\s+(out\s+of\s+(town|country|state)|overseas|abroad|deployed|traveling)\s*(right\s+now|currently)?.*\s+(key|property|rent|lease)/i, category: "Rental Scam", severity: "high" },
+    { pattern: /i'?m\s+(out\s+of\s+(town|country|state)|overseas|abroad|deployed|traveling)\s*(right\s+now|currently)?.{0,100}\s+(key|property|rent|lease)/i, category: "Rental Scam", severity: "high" },
     { pattern: /send\s+(the\s+)?deposit\s+(first|now|today|before)/i, category: "Rental Deposit Scam", severity: "high" },
     { pattern: /first\s+month.?s?\s+rent\s+(plus|and|\+)\s+deposit\s+(via|through|by)/i, category: "Rental Payment Scam", severity: "medium" },
-    { pattern: /available\s+immediately.*no\s+(lease|credit\s+check)/i, category: "Rental Scam", severity: "medium" },
+    { pattern: /available\s+immediately.{0,100}no\s+(lease|credit\s+check)/i, category: "Rental Scam", severity: "medium" },
 
     // ---- Ticket / Event scams ----
     { pattern: /selling\s+(my\s+)?(tickets?|passes?)\s+(for|to|at)\s+(a\s+)?(discount|less|half|cheap)/i, category: "Ticket Scam", severity: "medium" },
     { pattern: /(sold\s+out|last\s+minute)\s+(tickets?|passes?)\s+available/i, category: "Ticket Scam", severity: "medium" },
-    { pattern: /can'?t\s+(go|make\s+it|attend).*selling\s+(my\s+)?tickets?/i, category: "Ticket Scam Risk", severity: "low" },
+    { pattern: /can'?t\s+(go|make\s+it|attend).{0,100}selling\s+(my\s+)?tickets?/i, category: "Ticket Scam Risk", severity: "low" },
     { pattern: /vip\s+(tickets?|passes?|access)\s+(for\s+sale|available|at\s+a\s+discount)/i, category: "VIP Ticket Scam", severity: "medium" },
     { pattern: /meet\s+and\s+greet\s+(passes?|tickets?|packages?)\s+available/i, category: "Fake Meet & Greet", severity: "medium" },
 
     // ---- Pet scams ----
     { pattern: /free\s+(puppy|puppies|kitten|kittens|dog|cat)\s+(to\s+)?(a\s+)?(good\s+)?home/i, category: "Pet Scam Risk", severity: "low" },
-    { pattern: /(puppy|kitten|dog|cat)\s+(for\s+)?(adoption|sale).*\$\d/i, category: "Pet Scam Risk", severity: "low" },
+    { pattern: /(puppy|kitten|dog|cat)\s+(for\s+)?(adoption|sale).{0,100}\$\d/i, category: "Pet Scam Risk", severity: "low" },
     { pattern: /shipping\s+(fee|cost)\s+(for|to\s+deliver)\s+(the\s+)?(puppy|kitten|pet|dog|cat)/i, category: "Pet Shipping Scam", severity: "high" },
     { pattern: /pet\s+(transportation|delivery|shipping)\s+(insurance|fee|cost|charge)/i, category: "Pet Shipping Scam", severity: "high" },
-    { pattern: /akc\s+registered.*\$\d/i, category: "Fake Breeder", severity: "medium" },
+    { pattern: /akc\s+registered.{0,100}\$\d/i, category: "Fake Breeder", severity: "medium" },
 
     // ---- Charity / Disaster scams ----
     { pattern: /donate\s+(now|today|here|directly)\s*(to\s+)?(help|save|support)?/i, category: "Donation Solicitation", severity: "low" },
     { pattern: /100%\s+(of\s+)?(all\s+)?(donations?|proceeds)\s+(go|goes)\s+(directly\s+)?to/i, category: "Charity Scam Risk", severity: "medium" },
     { pattern: /send\s+(donations?|money|funds?)\s+(to|via)\s+(this\s+)?(cash\s*app|venmo|zelle|paypal|bitcoin|btc)/i, category: "Suspicious Donation", severity: "high" },
-    { pattern: /go\s*fund\s*me.*share|share.*go\s*fund\s*me/i, category: "GoFundMe Share Request", severity: "low" },
+    { pattern: /go\s*fund\s*me.{0,100}share|share.{0,100}go\s*fund\s*me/i, category: "GoFundMe Share Request", severity: "low" },
     { pattern: /my\s+(child|baby|son|daughter|family|mother|father)\s+(is\s+)?(sick|dying|has\s+cancer|needs?\s+surgery)/i, category: "Sympathy Scam Risk", severity: "medium" },
 
     // ---- Tax / Government scams ----
@@ -261,9 +261,9 @@ const SocialMediaScanner = {
     { pattern: /(usps|fedex|ups|dhl)\s+(package|parcel|order)\s+(notification|alert|update)/i, category: "Fake Delivery Alert", severity: "medium" },
 
     // ---- Subscription / Free trial traps ----
-    { pattern: /free\s+trial.*credit\s+card|credit\s+card.*free\s+trial/i, category: "Subscription Trap", severity: "medium" },
+    { pattern: /free\s+trial.{0,100}credit\s+card|credit\s+card.{0,100}free\s+trial/i, category: "Subscription Trap", severity: "medium" },
     { pattern: /only\s+(pay|covers?)\s+(for\s+)?(shipping|postage|handling)/i, category: "Hidden Subscription", severity: "medium" },
-    { pattern: /cancel\s+anytime.*act\s+now|act\s+now.*cancel\s+anytime/i, category: "Subscription Pressure", severity: "low" },
+    { pattern: /cancel\s+anytime.{0,100}act\s+now|act\s+now.{0,100}cancel\s+anytime/i, category: "Subscription Pressure", severity: "low" },
     { pattern: /exclusive\s+(membership|access|club)\s*(only|just)\s+\$\d/i, category: "Membership Trap", severity: "medium" },
 
     // ---- QR code scams ----
@@ -297,7 +297,7 @@ const SocialMediaScanner = {
     { pattern: /please\s+(send|refund|return)\s+(the\s+)?(difference|extra|overpayment)/i, category: "Overpayment Scam", severity: "high" },
     { pattern: /you\s+(are|have\s+been)\s+(owed|due)\s+(a\s+)?refund/i, category: "Fake Refund", severity: "medium" },
     { pattern: /claim\s+your\s+refund/i, category: "Fake Refund", severity: "medium" },
-    { pattern: /pending\s+refund.*verify|verify.*pending\s+refund/i, category: "Fake Refund", severity: "high" },
+    { pattern: /pending\s+refund.{0,100}verify|verify.{0,100}pending\s+refund/i, category: "Fake Refund", severity: "high" },
 
     // ---- Pyramid / Ponzi explicit language ----
     { pattern: /recruit\s+(\d+\s+)?(members?|people|friends?|partners?)\s+(and|to)\s+(earn|get|receive)/i, category: "Pyramid Scheme", severity: "high" },
@@ -321,7 +321,7 @@ const SocialMediaScanner = {
     // ---- Insurance / Warranty scams ----
     { pattern: /your\s+(car|vehicle|auto)\s+(warranty|insurance)\s+(has\s+expired|is\s+expiring|about\s+to\s+expire)/i, category: "Warranty Scam", severity: "high" },
     { pattern: /extended\s+(warranty|protection)\s+(offer|deal|available)/i, category: "Extended Warranty Scam", severity: "medium" },
-    { pattern: /final\s+(notice|warning).*warranty/i, category: "Warranty Scam", severity: "high" },
+    { pattern: /final\s+(notice|warning).{0,100}warranty/i, category: "Warranty Scam", severity: "high" },
 
     // ---- Timeshare / Vacation scams ----
     { pattern: /free\s+(vacation|trip|cruise|holiday)\s*(to|for|if|when)/i, category: "Vacation Scam", severity: "medium" },
@@ -335,14 +335,14 @@ const SocialMediaScanner = {
     { pattern: /this\s+(video|photo|story)\s+is\s+going\s+viral/i, category: "Clickbait", severity: "low" },
     { pattern: /the\s+(government|media|they)\s+(doesn'?t|don'?t)\s+want\s+you\s+to\s+(know|see)/i, category: "Conspiracy Clickbait", severity: "low" },
     { pattern: /leaked\s+(video|photos?|documents?|footage)/i, category: "Clickbait", severity: "low" },
-    { pattern: /celebrity.*died|died.*celebrity/i, category: "Death Hoax Clickbait", severity: "low" },
+    { pattern: /celebrity.{0,100}died|died.{0,100}celebrity/i, category: "Death Hoax Clickbait", severity: "low" },
 
     // ---- Facebook Marketplace specific ----
-    { pattern: /still\s+available\??.*cash\s+only/i, category: "Marketplace Caution", severity: "low", platforms: ["facebook"] },
+    { pattern: /still\s+available\??.{0,100}cash\s+only/i, category: "Marketplace Caution", severity: "low", platforms: ["facebook"] },
     { pattern: /my\s+(husband|wife|son|daughter|relative)\s+(left|passed|doesn'?t\s+need)/i, category: "Emotional Marketplace Pitch", severity: "low", platforms: ["facebook"] },
-    { pattern: /moving\s+(sale|away|overseas).*must\s+(sell|go)/i, category: "Urgency Marketplace Pitch", severity: "low", platforms: ["facebook"] },
+    { pattern: /moving\s+(sale|away|overseas).{0,100}must\s+(sell|go)/i, category: "Urgency Marketplace Pitch", severity: "low", platforms: ["facebook"] },
     { pattern: /(pick\s+up|meet)\s+at\s+(a\s+)?(gas\s+station|parking\s+lot|neutral\s+location)/i, category: "Marketplace Safety", severity: "low", platforms: ["facebook"] },
-    { pattern: /i'?ll\s+(ship|send|mail)\s+(it|the\s+item).*pay\s+(first|upfront|in\s+advance)/i, category: "Marketplace Prepayment Scam", severity: "high", platforms: ["facebook"] },
+    { pattern: /i'?ll\s+(ship|send|mail)\s+(it|the\s+item).{0,100}pay\s+(first|upfront|in\s+advance)/i, category: "Marketplace Prepayment Scam", severity: "high", platforms: ["facebook"] },
     { pattern: /deposit\s+(to\s+)?hold\s+(it|the\s+item)/i, category: "Marketplace Deposit Scam", severity: "medium", platforms: ["facebook"] },
     { pattern: /send\s+(a\s+)?verification\s+code/i, category: "Verification Code Scam", severity: "high" },
     { pattern: /google\s+voice\s+(verification|code|number)/i, category: "Google Voice Scam", severity: "high" },
@@ -359,8 +359,8 @@ const SocialMediaScanner = {
     { pattern: /sub(scribe)?\s+(to\s+)?my\s+channel/i, category: "Sub4Sub Spam", severity: "low", platforms: ["youtube"] },
     { pattern: /sub\s*4\s*sub|follow\s*4\s*follow|f4f|s4s/i, category: "Sub4Sub Spam", severity: "low", platforms: ["youtube", "instagram", "tiktok"] },
     { pattern: /check\s+out\s+my\s+(channel|video|content)/i, category: "Self-Promo Spam", severity: "low", platforms: ["youtube"] },
-    { pattern: /free\s+(v[\-]?bucks|robux|coins?|gems?|diamonds?)/i, category: "Game Currency Scam", severity: "high" },
-    { pattern: /(v[\-]?bucks|robux)\s+(generator|hack|free|glitch|method)/i, category: "Game Currency Scam", severity: "high" },
+    { pattern: /free\s+(v[-]?bucks|robux|coins?|gems?|diamonds?)/i, category: "Game Currency Scam", severity: "high" },
+    { pattern: /(v[-]?bucks|robux)\s+(generator|hack|free|glitch|method)/i, category: "Game Currency Scam", severity: "high" },
 
     // ---- Fake verification / Blue check scams ----
     { pattern: /get\s+(verified|your\s+blue\s+(check|tick|badge))/i, category: "Fake Verification", severity: "medium" },
@@ -368,7 +368,7 @@ const SocialMediaScanner = {
     { pattern: /apply\s+for\s+verification\s+(here|now|today)/i, category: "Fake Verification", severity: "medium" },
 
     // ---- Fake invoice / Payment request ----
-    { pattern: /invoice\s+#?\d+.*\$([\d,]+\.?\d*)/i, category: "Fake Invoice", severity: "high" },
+    { pattern: /invoice\s+#?\d+.{0,100}\$([\d,]+\.?\d*)/i, category: "Fake Invoice", severity: "high" },
     { pattern: /payment\s+(due|overdue|outstanding|pending)\s*(of\s+)?\$/i, category: "Fake Invoice", severity: "high" },
     { pattern: /your\s+(subscription|membership|order)\s+(has\s+been|was)\s+(renewed|charged|billed)/i, category: "Fake Billing Alert", severity: "high" },
     { pattern: /unauthorized\s+(charge|transaction|payment|purchase)\s+(of|for)\s+\$/i, category: "Fake Charge Alert", severity: "high" },
@@ -381,7 +381,7 @@ const SocialMediaScanner = {
 
     // ---- Survey scams ----
     { pattern: /complete\s+(this|a)\s+(short\s+)?(survey|questionnaire)\s+(to|and)\s+(win|get|receive|claim)/i, category: "Survey Scam", severity: "medium" },
-    { pattern: /take\s+(this|our|a)\s+survey.*\$?\d+\s*(gift\s+card|cash|reward)/i, category: "Survey Scam", severity: "medium" },
+    { pattern: /take\s+(this|our|a)\s+survey.{0,100}\$?\d+\s*(gift\s+card|cash|reward)/i, category: "Survey Scam", severity: "medium" },
     { pattern: /your\s+opinion\s+(is\s+)?worth\s+\$?\d/i, category: "Survey Scam", severity: "medium" },
 
     // ---- Fake app / Software scams ----
@@ -400,7 +400,7 @@ const SocialMediaScanner = {
     { pattern: /i\s+(was|got)\s+(robbed|mugged|kidnapped|arrested)/i, category: "Distress Scam", severity: "medium" },
     { pattern: /please\s+(wire|send|transfer)\s+money\s+(urgently|immediately|asap|now)/i, category: "Emergency Money Request", severity: "high" },
     { pattern: /i'?ll\s+pay\s+(you\s+)?back\s+(as\s+soon\s+as|when\s+i|tomorrow|next\s+week)/i, category: "Money Request", severity: "low" },
-    { pattern: /hospital\s+(bill|fees?).*help|help.*hospital\s+(bill|fees?)/i, category: "Medical Emergency Scam", severity: "medium" },
+    { pattern: /hospital\s+(bill|fees?).{0,100}help|help.{0,100}hospital\s+(bill|fees?)/i, category: "Medical Emergency Scam", severity: "medium" },
 
     // ---- AI / Deepfake indicators ----
     { pattern: /ai[\s-]?(generated|powered|trading|bot|earns?|makes?)/i, category: "AI Scam Tool", severity: "medium" },
@@ -472,7 +472,7 @@ const SocialMediaScanner = {
     // ---- Zelle-specific scam flows ----
     { pattern: /upgrade\s+(to|your)\s+(zelle\s+)?(business|premium)\s+account/i, category: "Zelle Scam", severity: "high" },
     { pattern: /zelle\s+(limit|daily\s+limit|transaction\s+limit)\s+(exceeded|reached|hit)/i, category: "Zelle Scam", severity: "high" },
-    { pattern: /zelle\s+(payment|transfer)\s+(pending|failed|on\s+hold).*upgrade/i, category: "Zelle Scam", severity: "high" },
+    { pattern: /zelle\s+(payment|transfer)\s+(pending|failed|on\s+hold).{0,100}upgrade/i, category: "Zelle Scam", severity: "high" },
 
     // ---- Fake recovery services (targets scam victims) ----
     { pattern: /recover\s+(your\s+)?(lost|stolen|scammed)\s+(money|funds?|crypto|bitcoin)/i, category: "Recovery Scam", severity: "high" },
@@ -808,7 +808,6 @@ const SocialMediaScanner = {
     const platformName = this._platform ? this._platform.name : null;
     // Normalize to defeat zero-width char and homoglyph evasion
     const normalizedText = typeof TextNormalizer !== "undefined" ? TextNormalizer.normalize(text) : text;
-    const lowerText = normalizedText.toLowerCase();
 
     for (const sp of this.SCAM_PATTERNS) {
       // Platform filter: skip patterns locked to other platforms
@@ -1029,7 +1028,7 @@ const SocialMediaScanner = {
     }
 
     // WhatsApp/Telegram number in post
-    if (/whatsapp.*\+?\d{10,}|\+?\d{10,}.*whatsapp/i.test(text)) {
+    if (/whatsapp.{0,60}\+?\d{10,}|\+?\d{10,}.{0,60}whatsapp/i.test(text)) {
       findings.push({
         severity: "medium",
         category: "WhatsApp Solicitation",
@@ -1047,7 +1046,6 @@ const SocialMediaScanner = {
     if (findings.length < 2) return;
 
     const categories = new Set(findings.map(f => f.category));
-    const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
 
     // Check named combo rules
     for (const rule of this.COMBO_RULES) {
@@ -1062,7 +1060,6 @@ const SocialMediaScanner = {
     }
 
     // Generic escalation: many low-severity findings = something's off
-    const lowCount = findings.filter(f => f.severity === "low").length;
     const uniqueLowCategories = new Set(findings.filter(f => f.severity === "low").map(f => f.category)).size;
 
     if (uniqueLowCategories >= 4) {

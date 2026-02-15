@@ -225,7 +225,7 @@ const TechSupportScamDetector = {
       }
 
       // History manipulation to prevent back button
-      if (/history\s*\.\s*(pushState|replaceState).*setInterval|setInterval.*history\s*\.\s*(pushState|replaceState)/i.test(content)) {
+      if (/history\s*\.\s*(pushState|replaceState).{0,500}setInterval|setInterval.{0,500}history\s*\.\s*(pushState|replaceState)/i.test(content)) {
         hasLockAttempt = true;
       }
 
