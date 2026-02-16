@@ -35,6 +35,63 @@ const ScaimBanner = {
   },
 
   /**
+   * Show a compact lite banner that auto-hides after 5 seconds.
+   */
+  showLite(assessment) {
+    if (this._dismissedUrls.has(window.location.href)) return;
+    clearTimeout(this._removeTimer);
+    this.remove();
+
+    const levelConfig = this._getLevelConfig(assessment.level);
+    const banner = document.createElement("div");
+    banner.id = this._bannerId;
+    banner.className = `scaim-banner-lite scaim-${assessment.level}`;
+
+    const content = document.createElement("div");
+    content.className = "scaim-lite-content";
+
+    const icon = document.createElement("span");
+    icon.className = "scaim-lite-icon";
+    icon.textContent = levelConfig.icon;
+
+    const text = document.createElement("span");
+    text.className = "scaim-lite-text";
+    text.textContent = levelConfig.title + " \u2014 Score: " + assessment.score + "/100";
+
+    const dismissBtn = document.createElement("button");
+    dismissBtn.className = "scaim-lite-dismiss";
+    dismissBtn.title = "Dismiss";
+    dismissBtn.textContent = "\u00D7";
+
+    content.appendChild(icon);
+    content.appendChild(text);
+    content.appendChild(dismissBtn);
+    banner.appendChild(content);
+    dismissBtn.addEventListener("click", () => {
+      clearTimeout(this._removeTimer);
+      banner.classList.remove("scaim-visible");
+      this._dismissedUrls.add(window.location.href);
+      this._removeTimer = setTimeout(() => this.remove(), 400);
+    });
+
+    document.body.prepend(banner);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        banner.classList.add("scaim-visible");
+      });
+    });
+
+    // Auto-hide after 5 seconds
+    this._removeTimer = setTimeout(() => {
+      if (document.getElementById(this._bannerId)) {
+        banner.classList.remove("scaim-visible");
+        this._removeTimer = setTimeout(() => this.remove(), 400);
+      }
+    }, 5000);
+  },
+
+  /**
    * Remove the banner and spacer from the DOM.
    */
   remove() {

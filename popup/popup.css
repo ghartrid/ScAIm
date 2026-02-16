@@ -354,6 +354,56 @@ body {
   font-style: italic;
 }
 
+/* Notification Mode Selector */
+.scaim-mode-section {
+  margin: 10px 0;
+  padding: 8px 0;
+  border-top: 1px solid #E1E4E8;
+}
+
+.scaim-mode-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.scaim-mode-options {
+  display: flex;
+  gap: 0;
+  border: 1px solid #D1D5DA;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.scaim-mode-btn {
+  flex: 1;
+  padding: 6px 0;
+  border: none;
+  background: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+}
+
+.scaim-mode-btn + .scaim-mode-btn {
+  border-left: 1px solid #D1D5DA;
+}
+
+.scaim-mode-btn:hover {
+  background: #F6F8FA;
+}
+
+.scaim-mode-btn.active {
+  background: #28A745;
+  color: white;
+}
+
 /* Disabled state */
 .scaim-popup.disabled {
   opacity: 0.6;

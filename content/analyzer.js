@@ -10,6 +10,7 @@ const ScaimAnalyzer = {
   _lastUrl: null,
   _debounceTimer: null,
   _navigationPatched: false,
+  _bannerCallId: 0,
 
   /**
    * Run the full paranoid analysis pipeline.
@@ -66,7 +67,7 @@ const ScaimAnalyzer = {
         };
         this._results = assessment;
         this._sendToBackground(assessment);
-        ScaimBanner.show(assessment);
+        this._showBannerIfAllowed(assessment);
         return;
       }
 
@@ -136,11 +137,28 @@ const ScaimAnalyzer = {
 
       // Show banner if threat level is caution or above
       if (assessment.level !== ScaimScoring.LEVELS.SAFE) {
-        ScaimBanner.show(assessment);
+        this._showBannerIfAllowed(assessment);
       }
     } catch (err) {
       console.error("[ScAIm] Analysis error:", err);
     }
+  },
+
+  /**
+   * Show banner respecting the user's notification mode setting.
+   */
+  _showBannerIfAllowed(assessment) {
+    const callId = ++this._bannerCallId;
+    chrome.storage.local.get("notificationMode", (result) => {
+      if (callId !== this._bannerCallId) return; // stale callback
+      const mode = result.notificationMode || "full";
+      if (mode === "full") {
+        ScaimBanner.show(assessment);
+      } else if (mode === "lite") {
+        ScaimBanner.showLite(assessment);
+      }
+      // silent: no banner
+    });
   },
 
   /**
@@ -240,7 +258,7 @@ const ScaimAnalyzer = {
 
     // Show/update the banner if threat level elevated
     if (this._results.level !== "safe") {
-      ScaimBanner.show(this._results);
+      this._showBannerIfAllowed(this._results);
     }
 
     // Update background with merged results
@@ -328,6 +346,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   } else if (message.type === "SCAIM_RERUN") {
     ScaimAnalyzer.rerun();
+    sendResponse({ ok: true });
+  } else if (message.type === "SCAIM_MODE_CHANGED") {
+    if (message.mode === "silent") {
+      ScaimBanner.remove();
+    } else if (ScaimAnalyzer._results && ScaimAnalyzer._results.level !== "safe") {
+      ScaimBanner.remove();
+      ScaimAnalyzer._showBannerIfAllowed(ScaimAnalyzer._results);
+    }
     sendResponse({ ok: true });
   } else if (message.type === "SCAIM_ALLOWLIST_ADD") {
     DomainLists.addToAllowlist(message.hostname).then(() => {

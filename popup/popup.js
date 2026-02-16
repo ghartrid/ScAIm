@@ -32,6 +32,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentHostname = null;
 
+  // ---- Notification Mode ----
+  const modeBtns = document.querySelectorAll(".scaim-mode-btn");
+
+  // Load saved mode
+  chrome.storage.local.get("notificationMode", (result) => {
+    const mode = result.notificationMode || "full";
+    modeBtns.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
+  });
+
+  // Mode button click handler
+  modeBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.mode;
+      chrome.storage.local.set({ notificationMode: mode });
+      modeBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      // Notify content script to update banner immediately
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            type: "SCAIM_MODE_CHANGED",
+            mode: mode
+          }, () => { if (chrome.runtime.lastError) { /* ignore */ } });
+        }
+      });
+    });
+  });
+
   // Load enabled state
   chrome.runtime.sendMessage({ type: "SCAIM_GET_STATE" }, (response) => {
     if (response) {
